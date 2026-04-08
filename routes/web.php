@@ -487,4 +487,98 @@ Route::middleware(['auth'])->group(function () {
 // Webhook is public (no auth middleware) — PayPal calls this server-to-server
 // Add CSRF exception in App\Http\Middleware\VerifyCsrfToken -> $except array
 Route::post('/paypal/webhook', [PayPalController::class, 'webhook'])->name('paypal.webhook');
- 
+
+
+/*
+|--------------------------------------------------------------------------
+| Shop / Merchandise Routes
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\Shop\ShopController;
+use App\Http\Controllers\Shop\CartController;
+use App\Http\Controllers\Shop\CheckoutController;
+use App\Http\Controllers\Admin\Shop\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\Shop\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\Shop\ShippingController as AdminShippingController;
+use App\Http\Controllers\Admin\Shop\TaxController as AdminTaxController;
+use App\Http\Controllers\Admin\Shop\CouponController as AdminCouponController;
+use App\Http\Controllers\Admin\Shop\ShopCategoryController as AdminShopCategoryController;
+
+// ── Frontend: Public Shop ──────────────────────────────────────────────────
+Route::prefix('merchandise')->name('shop.merchandise.')->group(function () {
+    Route::get('/',            [ShopController::class, 'index'])->name('index');
+    Route::get('/{product}',   [ShopController::class, 'show'])->name('show');
+});
+
+// ── Frontend: Cart (session-based, no auth required) ──────────────────────
+Route::prefix('cart')->name('shop.cart.')->group(function () {
+    Route::get('/',                      [CartController::class, 'index'])->name('index');
+    Route::post('/add',                  [CartController::class, 'add'])->name('add');
+    Route::patch('/{item}',              [CartController::class, 'update'])->name('update');
+    Route::delete('/{item}',             [CartController::class, 'remove'])->name('remove');
+    Route::post('/coupon/apply',         [CartController::class, 'applyCoupon'])->name('apply-coupon');
+    Route::delete('/coupon/remove',      [CartController::class, 'removeCoupon'])->name('remove-coupon');
+    Route::get('/count',                 [CartController::class, 'count'])->name('count');
+});
+
+// ── Frontend: Checkout ─────────────────────────────────────────────────────
+Route::prefix('checkout')->name('shop.checkout.')->group(function () {
+    Route::get('/',                      [CheckoutController::class, 'index'])->name('index');
+    Route::post('/',                     [CheckoutController::class, 'store'])->name('store');
+    Route::get('/shipping-rates',        [CheckoutController::class, 'getShippingRates'])->name('shipping-rates');
+    Route::post('/payment-intent',       [CheckoutController::class, 'createPaymentIntent'])->name('payment-intent');
+    Route::get('/success/{orderNumber}', [CheckoutController::class, 'success'])->name('success');
+});
+
+// ── Admin: Shop Management ─────────────────────────────────────────────────
+Route::prefix('admin/shop')->name('admin.shop.')->middleware(['admin.firewall', 'auth:admin', '2fa.admin'])->group(function () {
+
+    // Products
+    Route::get('/products',                    [AdminProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create',             [AdminProductController::class, 'create'])->name('products.create');
+    Route::post('/products',                   [AdminProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}/edit',     [AdminProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}',          [AdminProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}',       [AdminProductController::class, 'destroy'])->name('products.destroy');
+    Route::delete('/product-images/{image}',   [AdminProductController::class, 'deleteImage'])->name('products.delete-image');
+
+    // Orders
+    Route::get('/orders',                      [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}',              [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::put('/orders/{order}',              [AdminOrderController::class, 'update'])->name('orders.update');
+
+    // Shipping
+    Route::get('/shipping',                    [AdminShippingController::class, 'index'])->name('shipping.index');
+    Route::get('/shipping/create-zone',        [AdminShippingController::class, 'createZone'])->name('shipping.create-zone');
+    Route::post('/shipping/zones',             [AdminShippingController::class, 'storeZone'])->name('shipping.store-zone');
+    Route::get('/shipping/zones/{zone}/edit',  [AdminShippingController::class, 'editZone'])->name('shipping.edit-zone');
+    Route::put('/shipping/zones/{zone}',       [AdminShippingController::class, 'updateZone'])->name('shipping.update-zone');
+    Route::delete('/shipping/zones/{zone}',    [AdminShippingController::class, 'destroyZone'])->name('shipping.destroy-zone');
+    Route::post('/shipping/zones/{zone}/rates',[AdminShippingController::class, 'storeRate'])->name('shipping.store-rate');
+    Route::delete('/shipping/rates/{rate}',    [AdminShippingController::class, 'destroyRate'])->name('shipping.destroy-rate');
+
+    // Taxes
+    Route::get('/taxes',                       [AdminTaxController::class, 'index'])->name('taxes.index');
+    Route::post('/taxes',                      [AdminTaxController::class, 'store'])->name('taxes.store');
+    Route::put('/taxes/{tax}',                 [AdminTaxController::class, 'update'])->name('taxes.update');
+    Route::delete('/taxes/{tax}',              [AdminTaxController::class, 'destroy'])->name('taxes.destroy');
+
+    // Coupons
+    Route::get('/coupons',                     [AdminCouponController::class, 'index'])->name('coupons.index');
+    Route::get('/coupons/create',              [AdminCouponController::class, 'create'])->name('coupons.create');
+    Route::post('/coupons',                    [AdminCouponController::class, 'store'])->name('coupons.store');
+    Route::get('/coupons/{coupon}/edit',       [AdminCouponController::class, 'edit'])->name('coupons.edit');
+    Route::put('/coupons/{coupon}',            [AdminCouponController::class, 'update'])->name('coupons.update');
+    Route::delete('/coupons/{coupon}',         [AdminCouponController::class, 'destroy'])->name('coupons.destroy');
+    Route::get('/coupons/generate-code',       [AdminCouponController::class, 'generate'])->name('coupons.generate');
+
+    // Shop Categories
+    Route::get('/categories',                  [AdminShopCategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categories/create',           [AdminShopCategoryController::class, 'create'])->name('categories.create');
+    Route::post('/categories',                 [AdminShopCategoryController::class, 'store'])->name('categories.store');
+    Route::get('/categories/{category}/edit',  [AdminShopCategoryController::class, 'edit'])->name('categories.edit');
+    Route::put('/categories/{category}',       [AdminShopCategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}',    [AdminShopCategoryController::class, 'destroy'])->name('categories.destroy');
+});
+
