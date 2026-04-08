@@ -1,0 +1,61 @@
+{
+  "resources/css/custom.css": {
+    "file": "assets/custom-C6Lx_nto.css",
+    "src": "resources/css/custom.css",
+    "isEntry": true
+  },
+  "resources/css/external.css": {
+    "file": "assets/external-XxqjuATk.css",
+    "src": "resources/css/external.css",
+    "isEntry": true
+  },
+  "resources/css/fonts/ThinFox.eot": {
+    "file": "assets/ThinFox-DdfpClMZ.eot",
+    "src": "resources/css/fonts/ThinFox.eot"
+  },
+  "resources/css/fonts/ThinFox.ttf": {
+    "file": "assets/ThinFox-opa8DtRQ.ttf",
+    "src": "resources/css/fonts/ThinFox.ttf"
+  },
+  "resources/css/fonts/ThinFox.woff": {
+    "file": "assets/ThinFox-GBUTU0ig.woff",
+    "src": "resources/css/fonts/ThinFox.woff"
+  },
+  "resources/css/fonts/ThinFox.woff2": {
+    "file": "assets/ThinFox-D2ErE-fn.woff2",
+    "src": "resources/css/fonts/ThinFox.woff2"
+  },
+  "resources/css/slick.css": {
+    "file": "assets/slick-CbWFAYwR.css",
+    "src": "resources/css/slick.css",
+    "isEntry": true
+  },
+  "resources/css/style.css": {
+    "file": "assets/style-CBOpk-Bn.css",
+    "src": "resources/css/style.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-_hzO9fR_.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/consumer.js": {
+    "file": "assets/consumer-CQPyIJka.js",
+    "name": "consumer",
+    "src": "resources/js/consumer.js",
+    "isEntry": true
+  },
+  "resources/js/flipclock.js": {
+    "file": "assets/flipclock-DXl6wkvx.js",
+    "name": "flipclock",
+    "src": "resources/js/flipclock.js",
+    "isEntry": true
+  },
+  "resources/sass/app.scss": {
+    "file": "assets/app-DbaZCfaT.css",
+    "src": "resources/sass/app.scss",
+    "isEntry": true
+  }
+}

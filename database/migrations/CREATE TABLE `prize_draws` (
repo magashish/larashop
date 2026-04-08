@@ -1,0 +1,91 @@
+CREATE TABLE `prize_draws` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `admin_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `draw_type` enum('users','organisations') NOT NULL DEFAULT 'users',
+  `draw_date` date NOT NULL,
+  `participants` int(11) DEFAULT NULL,
+  `number_of_entries` int(11) DEFAULT NULL,
+  `winner_id` int(11) DEFAULT NULL,
+  `draw_datetime` timestamp NULL DEFAULT NULL,
+  `winner_user_finalised` enum('yes','no') NOT NULL DEFAULT 'no',
+  `winner_user_prize_draw_entry_id` char(36) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `prize_draw_entries_log` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `prize_draw_id` bigint(20) UNSIGNED NOT NULL,
+  `entries_added` int(11) NOT NULL DEFAULT 1,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `users` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `first_name` varchar(255) NOT NULL DEFAULT '',
+  `last_name` varchar(255) NOT NULL DEFAULT '',
+  `email` varchar(255) NOT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `mobile` varchar(255) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `level` enum('business','member') NOT NULL DEFAULT 'member',
+  `status` enum('active','deactive') NOT NULL DEFAULT 'active',
+  `access_permissions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`access_permissions`)),
+  `remember_token` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `stripe_id` varchar(255) DEFAULT NULL,
+  `pm_type` varchar(255) DEFAULT NULL,
+  `pm_last_four` varchar(4) DEFAULT NULL,
+  `trial_ends_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `user_package_subscriptions` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `plan_id` bigint(20) UNSIGNED NOT NULL,
+  `type` enum('subscription','package') NOT NULL,
+  `purchase_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `starts_at` timestamp NULL DEFAULT NULL,
+  `ends_at` timestamp NULL DEFAULT NULL,
+  `status` enum('active','suspended','cancelled','future','expired') NOT NULL,
+  `stripe_id` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+
+basically i have these table i want crte a proze draw system i have 2 plan package and subscription
+
+pakage has --  1 month
+               2 month
+               3 month
+
+subscription   1 year
+
+
+now crte a entery on that base 
+
+if 1 month packafge then a entery will genrate every week  then therefore 4 enteyr there in 1 motnh
+if 2 month packafge then a entery will genrate every week  then therefore 8 enteyr there  in 2 motnh
+if 3 month packafge then a entery will genrate every week  then therefore 12 enteyr there in 3 motnh
+
+and if subscription then 52 entery  in one year 
+
+
+
+now whose user has more entery he is winner 
+And user winer then set its entery again to 0
+and again enetry from stat that week 
+
+
+gave me all that scenerio  for this one  in laravel in canvas

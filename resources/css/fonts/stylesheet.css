@@ -1,0 +1,12 @@
+@font-face {
+    font-family: 'Thin Fox';
+    src: url('ThinFox.eot');
+    src: url('ThinFox.eot?#iefix') format('embedded-opentype'),
+        url('ThinFox.woff2') format('woff2'),
+        url('ThinFox.woff') format('woff'),
+        url('ThinFox.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+

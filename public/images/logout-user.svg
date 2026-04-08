@@ -1,0 +1,11 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" width="33" height="33">
+	<title>Ellipse 72</title>
+	<defs>
+		<image  width="17" height="19" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAATCAMAAABBexbDAAAAAXNSR0IB2cksfwAAAJ9QTFRFAAAA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////Cnd5uAAAADV0Uk5TADXD/91fTP2WC+9CWZh6vnK0JmWIzwMBd/ecCg4/QCq2/tZnB6TSD4PHe6jw5ij5PF6AeAl71JTDAAAAoklEQVR4nFXO2wrCMAwG4PyCQ2WUMYSCCF4IHhhDfP/XkKEogoI3kzHGGCp6YbOlow20DV9IExAHAHO+Xc5XgB8/w7eVMT5tlUaNSPjqgCa1iGpEwkokqkVUKRJXIlFhZ03LFmLkVjQ413j0+xDNzY43IkecYAlmuHO+AC4sWl37+hInI5uz07IqcmDg/bLOkBw92T6RZv6oBLuDLyn2/kbAH/x3Hr0kDnFZAAAAAElFTkSuQmCC"/>
+	</defs>
+	<style>
+		.s0 { fill: #28a745 } 
+	</style>
+	<path id="Ellipse_72" fill-rule="evenodd" class="s0" d="m16.5 33c-9.1 0-16.5-7.4-16.5-16.5 0-9.1 7.4-16.5 16.5-16.5 9.1 0 16.5 7.4 16.5 16.5 0 9.1-7.4 16.5-16.5 16.5z"/>
+	<use id="Layer 1" href="#img1" x="8" y="6"/>
+</svg>

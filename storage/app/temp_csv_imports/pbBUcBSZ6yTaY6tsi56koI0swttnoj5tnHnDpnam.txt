@@ -1,0 +1,2 @@
+Id,DateCreated,DateModified,MerchantId,MerchantAvatar,MerchantCampaignName,Name,Description,TargetUrl,StartDate,EndDate
+119302,2023-11-29 13:04:15,2023-11-29 13:04:15,88314,https://c.cfjump.com/Avatars/95fbec9f-d9c9-48ec-b18c-bd0b2e85f3a6.png,A Life Plus,Free Delivery over $50,,https://t.cfjump.com/90610/o/119302,2023-11-29 0:00:00,

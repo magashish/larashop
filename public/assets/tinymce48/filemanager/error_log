@@ -1,0 +1,2 @@
+[11-Nov-2024 21:32:07 Australia/Brisbane] PHP Deprecated:  usort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or greater than zero in /home/xhalecomau/public_html/admin.xhale.com.au/assets/tinymce48/filemanager/dialog.php on line 528
+[11-Nov-2024 21:32:11 Australia/Brisbane] PHP Deprecated:  usort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or greater than zero in /home/xhalecomau/public_html/admin.xhale.com.au/assets/tinymce48/filemanager/dialog.php on line 528
