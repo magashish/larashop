@@ -49,26 +49,53 @@
 }
 
 /* Colour swatches */
-.colour-swatch {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 2px solid transparent;
+.colour-swatches-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+}
+.swatch-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
     cursor: pointer;
-    transition: border-color .15s, transform .15s;
-    position: relative;
+}
+.swatch-item .swatch-name {
+    font-size: 10px;
+    color: #888;
+    text-align: center;
+    max-width: 48px;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color .15s;
+}
+.swatch-item.selected .swatch-name { color: #111; font-weight: 600; }
+.colour-swatch {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    cursor: pointer;
+    transition: transform .15s;
+    position: relative;
+    /* NO overflow:hidden here — it clips the outline */
 }
 .colour-swatch:hover { transform: scale(1.1); }
 .colour-swatch.selected {
-    border-color: #111 !important;
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111;
+    outline: 3px solid #111;
+    outline-offset: 2px;
+    border-color: #fff;
 }
 .colour-swatch img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+    overflow: hidden;
+    display: block;
 }
 
 /* Size buttons */
@@ -248,10 +275,11 @@
                 @if(count($initialImages) > 1)
                 <div class="thumb-strip" id="thumbStrip">
                     @foreach($initialImages as $i => $img)
-                    <img src="{{ asset('storage/' . $img) }}"
+                    @php $thumbSrc = Str::startsWith($img, 'http') ? $img : asset('storage/' . $img); @endphp
+                    <img src="{{ $thumbSrc }}"
                          class="thumb {{ $i === 0 ? 'active' : '' }}"
                          alt="{{ $product->name }}"
-                         onclick="switchMainImage(this, '{{ asset('storage/' . $img) }}')"
+                         onclick="switchMainImage(this, '{{ $thumbSrc }}')"
                          loading="lazy">
                     @endforeach
                 </div>
@@ -260,10 +288,11 @@
                 {{-- Main image --}}
                 <div class="main-image-wrap" id="mainImageWrap">
                     @if(!empty($initialImages))
-                        <img src="{{ asset('storage/' . $initialImages[0]) }}"
+                        @php $mainSrc = Str::startsWith($initialImages[0], 'http') ? $initialImages[0] : asset('storage/' . $initialImages[0]); @endphp
+                        <img src="{{ $mainSrc }}"
                              id="mainImage" alt="{{ $product->name }}">
                     @else
-                        <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                        <div class="d-flex align-items-center justify-content-center h-100 text-muted" id="mainImage" style="min-height:300px">
                             <i class="bi bi-image" style="font-size:4rem"></i>
                         </div>
                     @endif
@@ -310,16 +339,19 @@
                         Colour: <span id="selectedColourLabel" class="fw-normal text-muted">{{ $firstColor }}</span>
                     </span>
                 </div>
-                <div class="d-flex flex-wrap gap-2" id="colourSwatches">
+                <div class="colour-swatches-wrap" id="colourSwatches">
                     @foreach($colorMeta as $cName => $cData)
-                    <div class="colour-swatch {{ $loop->first ? 'selected' : '' }}"
+                    <div class="swatch-item {{ $loop->first ? 'selected' : '' }}"
                          data-colour="{{ $cName }}"
-                         title="{{ $cName }}"
-                         style="background-color: {{ $cData['hex'] }};"
                          onclick="selectColour('{{ $cName }}')">
-                        @if($cData['swatch'])
-                            <img src="{{ asset('storage/' . $cData['swatch']) }}" alt="{{ $cName }}">
-                        @endif
+                        <div class="colour-swatch {{ $loop->first ? 'selected' : '' }}"
+                             style="background-color: {{ $cData['hex'] ?? '#cccccc' }};"
+                             title="{{ $cName }}">
+                            @if($cData['swatch'])
+                                <img src="{{ asset('storage/' . $cData['swatch']) }}" alt="{{ $cName }}">
+                            @endif
+                        </div>
+                        <span class="swatch-name">{{ $cName }}</span>
                     </div>
                     @endforeach
                 </div>
@@ -571,9 +603,12 @@ function selectColour(colour) {
     selectedSize   = null;
     selectedVariantId = null;
 
-    // Update swatch UI
-    document.querySelectorAll('.colour-swatch').forEach(el => {
-        el.classList.toggle('selected', el.dataset.colour === colour);
+    // Update swatch UI — toggle both wrapper and inner circle
+    document.querySelectorAll('.swatch-item').forEach(el => {
+        const active = el.dataset.colour === colour;
+        el.classList.toggle('selected', active);
+        const circle = el.querySelector('.colour-swatch');
+        if (circle) circle.classList.toggle('selected', active);
     });
     document.getElementById('selectedColourLabel').textContent = colour;
 
@@ -587,27 +622,51 @@ function selectColour(colour) {
 }
 
 // ── Gallery swap ────────────────────────────────────────────────────────
+function imgSrc(path) {
+    // path may already be a full URL (from asset()) or a relative storage path
+    if (path.startsWith('http') || path.startsWith('/storage/')) return path;
+    return '/storage/' + path;
+}
+
 function updateGallery(images) {
-    const mainImg    = document.getElementById('mainImage');
-    const thumbStrip = document.getElementById('thumbStrip');
+    const mainWrap = document.getElementById('mainImageWrap');
+    if (!mainWrap) return;
 
-    if (!mainImg) return;
+    let mainImg = document.getElementById('mainImage');
 
-    if (images.length > 0) {
-        mainImg.src = '/storage/' + images[0];
+    if (images.length === 0) return;
+
+    // Ensure main img element exists
+    if (!mainImg) {
+        mainImg = document.createElement('img');
+        mainImg.id = 'mainImage';
+        mainImg.alt = '';
+        mainWrap.insertBefore(mainImg, mainWrap.firstChild);
     }
+    mainImg.src = imgSrc(images[0]);
 
-    if (thumbStrip) {
+    // Create or get thumb strip
+    let thumbStrip = document.getElementById('thumbStrip');
+    if (images.length > 1) {
+        if (!thumbStrip) {
+            thumbStrip = document.createElement('div');
+            thumbStrip.id = 'thumbStrip';
+            thumbStrip.className = 'thumb-strip';
+            mainWrap.parentNode.insertBefore(thumbStrip, mainWrap);
+        }
         thumbStrip.innerHTML = '';
         images.forEach((path, i) => {
             const img = document.createElement('img');
-            img.src       = '/storage/' + path;
+            const src = imgSrc(path);
+            img.src       = src;
             img.className = 'thumb' + (i === 0 ? ' active' : '');
             img.alt       = '';
             img.loading   = 'lazy';
-            img.onclick   = () => switchMainImage(img, '/storage/' + path);
+            img.onclick   = () => switchMainImage(img, src);
             thumbStrip.appendChild(img);
         });
+    } else if (thumbStrip) {
+        thumbStrip.remove();
     }
 }
 
