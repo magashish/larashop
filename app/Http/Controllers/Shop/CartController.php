@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
 use App\Models\ShopProduct;
+use App\Models\ShopProductVariant;
 use App\Models\ShopCartItem;
 use App\Models\ShopCoupon;
 use Illuminate\Http\Request;
@@ -45,35 +46,66 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:shop_products,id',
+            'variant_id' => 'nullable|exists:shop_product_variants,id',
             'quantity'   => 'required|integer|min:1|max:99',
         ]);
 
-        $product = ShopProduct::findOrFail($request->product_id);
+        $product = ShopProduct::with('variants')->findOrFail($request->product_id);
 
         if (!$product->is_active) {
             return back()->with('error', 'This product is not available.');
         }
-        if ($product->track_stock && $product->stock_quantity < $request->quantity && !$product->allow_backorders) {
-            return back()->with('error', 'Insufficient stock.');
+
+        $variant     = null;
+        $unitPrice   = $product->current_price;
+        $variantColor = null;
+        $variantSize  = null;
+
+        if ($request->filled('variant_id')) {
+            $variant = ShopProductVariant::where('id', $request->variant_id)
+                ->where('shop_product_id', $product->id)->first();
+
+            if (!$variant || !$variant->is_active) {
+                return back()->with('error', 'Selected variant is not available.');
+            }
+            if ($variant->stock_quantity < $request->quantity) {
+                return back()->with('error', 'Insufficient stock for the selected size.');
+            }
+            $unitPrice    = $variant->final_price;
+            $variantColor = $variant->color_name;
+            $variantSize  = $variant->size;
+        } elseif ($product->variants->isNotEmpty()) {
+            return back()->with('error', 'Please select a colour and size.');
+        } else {
+            if ($product->track_stock && $product->stock_quantity < $request->quantity && !$product->allow_backorders) {
+                return back()->with('error', 'Insufficient stock.');
+            }
         }
 
         $sessionId = $this->getSessionId();
-        $existing  = ShopCartItem::where('session_id', $sessionId)
-            ->where('shop_product_id', $product->id)->first();
+
+        // Look for existing cart row with same product + variant
+        $existing = ShopCartItem::where('session_id', $sessionId)
+            ->where('shop_product_id', $product->id)
+            ->where('shop_product_variant_id', $variant?->id)
+            ->first();
 
         if ($existing) {
             $newQty = $existing->quantity + $request->quantity;
-            if ($product->track_stock && $product->stock_quantity < $newQty && !$product->allow_backorders) {
-                $newQty = $product->stock_quantity;
+            if ($variant && $variant->stock_quantity < $newQty) {
+                $newQty = $variant->stock_quantity;
             }
             $existing->update(['quantity' => $newQty]);
         } else {
             ShopCartItem::create([
-                'session_id'      => $sessionId,
-                'user_id'         => auth()->id(),
-                'shop_product_id' => $product->id,
-                'quantity'        => $request->quantity,
-                'unit_price'      => $product->current_price,
+                'session_id'               => $sessionId,
+                'user_id'                  => auth()->id(),
+                'shop_product_id'          => $product->id,
+                'shop_product_variant_id'  => $variant?->id,
+                'variant_color'            => $variantColor,
+                'variant_size'             => $variantSize,
+                'quantity'                 => $request->quantity,
+                'unit_price'               => $unitPrice,
             ]);
         }
 

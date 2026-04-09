@@ -50,7 +50,11 @@
                                                 <a href="{{ route('shop.merchandise.show', $item->product) }}" class="text-dark text-decoration-none fw-semibold">
                                                     {{ $item->product->name }}
                                                 </a>
-                                                @if($item->product->sku)
+                                                @if($item->variant_color || $item->variant_size)
+                                                    <small class="d-block text-muted">
+                                                        {{ $item->variant_color }}{{ $item->variant_color && $item->variant_size ? ' / ' : '' }}{{ $item->variant_size }}
+                                                    </small>
+                                                @elseif($item->product->sku)
                                                     <small class="d-block text-muted">SKU: {{ $item->product->sku }}</small>
                                                 @endif
                                             </div>

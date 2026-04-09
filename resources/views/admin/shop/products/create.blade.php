@@ -133,6 +133,10 @@
             </div>
         </div>
     </div>
+
+    @php $formId = 'productForm'; @endphp
+    @include('admin.shop.products.partials.variants-panel')
+
 </div>
 @push('scripts')
 <script>

@@ -39,9 +39,48 @@ class ShopProduct extends Model
         return $this->hasMany(ShopProductImage::class)->orderBy('sort_order');
     }
 
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ShopProductVariant::class)->orderBy('color_name')->orderBy('size_order');
+    }
+
+    public function colorImages(): HasMany
+    {
+        return $this->hasMany(ShopProductColorImage::class)->orderBy('sort_order');
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(ShopOrderItem::class);
+    }
+
+    /** Unique colors available for this product */
+    public function getColorsAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->variants
+            ->groupBy('color_name')
+            ->map(fn($v) => $v->first())
+            ->values();
+    }
+
+    /** All sizes available across all colors */
+    public function getSizesAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->variants
+            ->sortBy('size_order')
+            ->unique('size')
+            ->values();
+    }
+
+    public function isInStock(): bool
+    {
+        if ($this->variants->isNotEmpty()) {
+            return $this->variants->where('is_active', true)->sum('stock_quantity') > 0;
+        }
+        if (!$this->track_stock) {
+            return true;
+        }
+        return $this->stock_quantity > 0 || $this->allow_backorders;
     }
 
     public function getCurrentPriceAttribute(): float

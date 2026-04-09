@@ -62,7 +62,7 @@ class ShopController extends Controller
             abort(404);
         }
 
-        $product->load(['category', 'images']);
+        $product->load(['category', 'images', 'variants', 'colorImages']);
 
         $related = ShopProduct::with('images')
             ->where('is_active', true)

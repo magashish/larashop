@@ -541,7 +541,8 @@ Route::prefix('admin/shop')->name('admin.shop.')->middleware(['admin.firewall', 
     Route::get('/products/{product}/edit',     [AdminProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/{product}',          [AdminProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}',       [AdminProductController::class, 'destroy'])->name('products.destroy');
-    Route::delete('/product-images/{image}',   [AdminProductController::class, 'deleteImage'])->name('products.delete-image');
+    Route::delete('/product-images/{image}',       [AdminProductController::class, 'deleteImage'])->name('products.delete-image');
+    Route::delete('/product-color-images/{image}', [AdminProductController::class, 'deleteColorImage'])->name('products.delete-color-image');
 
     // Orders
     Route::get('/orders',                      [AdminOrderController::class, 'index'])->name('orders.index');

@@ -152,5 +152,10 @@
             </div>
         </div>
     </div>
+
+    {{-- Variants Panel (full width below the 2-col layout) --}}
+    @php $formId = 'productForm'; @endphp
+    @include('admin.shop.products.partials.variants-panel')
+
 </div>
 @endsection

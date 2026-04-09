@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ShopCartItem extends Model
 {
     protected $fillable = [
-        'session_id', 'user_id', 'shop_product_id', 'quantity', 'unit_price',
+        'session_id', 'user_id', 'shop_product_id', 'shop_product_variant_id',
+        'variant_color', 'variant_size', 'quantity', 'unit_price',
     ];
 
     protected $casts = [
@@ -18,6 +19,11 @@ class ShopCartItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(ShopProduct::class, 'shop_product_id');
+    }
+
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ShopProductVariant::class, 'shop_product_variant_id');
     }
 
     public function getSubtotalAttribute(): float
