@@ -35,8 +35,8 @@ class TestController extends Controller
     $days = $request->get('days', 300);
     
     $dataPath = UserPackageSubscription::selectRaw('DATE(created_at) as date, COUNT(*) as count')
-        ->where('created_at', '>=', now()->subDays($days))
-        ->where('type', 'package')
+       // ->where('created_at', '>=', now()->subDays($days))
+      // ->where('type', 'package')
         ->groupBy('date')
         ->orderBy('date')
         ->get();
