@@ -93,14 +93,6 @@ class ShopProduct extends Model
         return $this->sale_price !== null && $this->sale_price < $this->price;
     }
 
-    public function isInStock(): bool
-    {
-        if (!$this->track_stock) {
-            return true;
-        }
-        return $this->stock_quantity > 0 || $this->allow_backorders;
-    }
-
     public function getRouteKeyName(): string
     {
         return 'slug';
