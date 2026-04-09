@@ -32,6 +32,10 @@
                                     <a href="{{ route('shop')}}">Discounts</a>
                                 </li>
 
+                                <li class="{{ Request::routeIs('shop.merchandise.*') ? 'active' : '' }}">
+                                    <a href="{{ route('shop.merchandise.index') }}">Shop</a>
+                                </li>
+
                                 <li class="{{ Request::routeIs('businessportal') ? 'active' : '' }}">
                                     <a href="{{ route('businessportal')}}">Business Portal</a>
                                 </li>

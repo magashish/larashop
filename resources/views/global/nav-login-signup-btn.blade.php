@@ -95,6 +95,20 @@
  <span><a href="{{ route('events')}}"><img src="{{ asset('images/search-icon.svg') }}"></a></span>
 </div>  --}}
 
+{{-- Cart icon with live count badge --}}
+@php
+    $cartItemCount = \App\Models\ShopCartItem::where('session_id', session()->getId())->sum('quantity');
+@endphp
+<a href="{{ route('shop.cart.index') }}" class="cart-nav-icon position-relative text-dark text-decoration-none me-2" title="Shopping Cart">
+    <i class="bi bi-bag" style="font-size: 1.3rem;"></i>
+    @if($cartItemCount > 0)
+    <span class="cart-count-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark"
+          style="font-size:10px; min-width:18px; height:18px; display:flex; align-items:center; justify-content:center; transform: translate(-40%, -30%) !important;">
+        {{ $cartItemCount > 99 ? '99+' : $cartItemCount }}
+    </span>
+    @endif
+</a>
+
 <div class="coming-soon-event">
     <i class="bi bi-list" data-bs-toggle="offcanvas" data-bs-target="#ComingSoonMenu" aria-controls="ComingSoonMenu"></i>
 
@@ -110,7 +124,13 @@
         </div>
         <div class="sec-btns">
             <a href="/events" class="btn d-block">Events</a>
-            <a href="#" class="btn d-block" data-bs-toggle="modal" data-bs-target="#comingSoonModal">Mechcandise</a>
+            <a href="{{ route('shop.merchandise.index') }}" class="btn d-block">Shop</a>
+            <a href="{{ route('shop.cart.index') }}" class="btn d-block">
+                Cart
+                @if($cartItemCount > 0)
+                    <span class="badge bg-light text-dark ms-1">{{ $cartItemCount }}</span>
+                @endif
+            </a>
             <a href="#" class="btn d-block" data-bs-toggle="modal" data-bs-target="#comingSoonModal">Charity</a>
         </div>
         <div class="auth-btns d-flex align-items-center justify-content-center gap-3 position-relative pb-5">
@@ -218,12 +238,23 @@
                 <a  class="{{ Request::routeIs('events') ? 'active' : '' }}" href="{{ route('events')}}"><span><img src="{{ asset('images/calendar-days-solid.svg') }}"></span> Events</a>
             </li> -->
             <li>
-                <a  class="{{ Request::routeIs('events') ? 'active' : '' }}" href="#"><span><img src="{{ asset('images/calendar-days-solid.svg') }}"></span> Coming Soon</a>
-                <ul class="coming-soon-submenu p-2 text-center mt-3">
-                    <li><a href="/events" class="btn d-block">Events</a></li>
-                    <li><a href="#" class="btn d-block" data-bs-toggle="modal" data-bs-target="#comingSoonModal">Mechcandise</a></li>
-                    <li><a href="#" class="btn d-block" data-bs-toggle="modal" data-bs-target="#comingSoonModal">Charity</a></li>
-                </ul>
+                <a class="{{ Request::routeIs('shop.merchandise.*') ? 'active' : '' }}" href="{{ route('shop.merchandise.index') }}">
+                    <span><i class="bi bi-bag" style="width:20px;display:inline-block;text-align:center"></i></span> Shop
+                </a>
+            </li>
+            <li>
+                <a class="{{ Request::routeIs('shop.cart.*') ? 'active' : '' }}" href="{{ route('shop.cart.index') }}">
+                    <span><i class="bi bi-cart" style="width:20px;display:inline-block;text-align:center"></i></span>
+                    Cart
+                    @if($cartItemCount > 0)
+                        <span class="badge bg-dark ms-1">{{ $cartItemCount }}</span>
+                    @endif
+                </a>
+            </li>
+            <li>
+                <a class="{{ Request::routeIs('events') ? 'active' : '' }}" href="/events">
+                    <span><img src="{{ asset('images/calendar-days-solid.svg') }}"></span> Events
+                </a>
             </li>
             <li>
                 <a class="{{ Request::routeIs('supportandlegal') ? 'active' : '' }}" href="{{ route('supportandlegal')}}"><span><img src="{{ asset('images/scale-balanced-solid.svg') }}"></span> Support & Legal</a>
@@ -277,8 +308,8 @@
                     </div>
                     <div class="action-btns">
                         <p class="mb-4 text-white d-sm-none d-block">Keep and eye out for these new and exciting Xhale features.</p>
-                        <a href="#" class="d-block signup">Events</a>
-                        <a href="#" class="d-block login business-signup-btn my-3">Mechcandise</a>
+                        <a href="/events" class="d-block signup">Events</a>
+                        <a href="{{ route('shop.merchandise.index') }}" class="d-block login business-signup-btn my-3">Shop</a>
                         <a href="#" class="d-block login">Charity</a>
                         <span class="skip-text mt-3 mb-0 text-uppercase">
                             @guest
