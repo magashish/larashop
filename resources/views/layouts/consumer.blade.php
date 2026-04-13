@@ -33,7 +33,7 @@
         'resources/css/style.css'
         ])
 
-
+    @stack('styles')
     </head>
     @php
     $pageClass = str_replace('/', '-', request()->path() ?: 'home');

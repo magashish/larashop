@@ -2,205 +2,189 @@
 
 @push('styles')
 <style>
-/* ── Product Page Layout ─────────────────────────────── */
-.product-page { background: #fff; }
+/* ── Product Page — scoped under #pdpWrap to avoid global CSS collisions ── */
+#pdpWrap { background: #fff; }
 
-/* Thumbnails: vertical strip on desktop, horizontal on mobile */
-.thumb-strip {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 80px;
-    flex-shrink: 0;
+/* ── Image Gallery: CSS grid so widths are guaranteed ── */
+#pdpGallery {
+    display: grid !important;
+    grid-template-columns: 80px 1fr !important;
+    gap: 12px !important;
+    align-items: start !important;
 }
-.thumb-strip .thumb {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
+#pdpGallery.no-thumbs {
+    grid-template-columns: 1fr !important;
+}
+#pdpThumbStrip {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+#pdpThumbStrip img {
+    display: block !important;
+    width: 80px !important;
+    height: 80px !important;
+    object-fit: cover !important;
     cursor: pointer;
     border: 2px solid transparent;
     border-radius: 4px;
     transition: border-color .2s;
+    flex-shrink: 0 !important;
 }
-.thumb-strip .thumb.active,
-.thumb-strip .thumb:hover {
-    border-color: #111;
-}
+#pdpThumbStrip img.active,
+#pdpThumbStrip img:hover { border-color: #111; }
 
-/* Main image */
-.main-image-wrap {
-    flex: 1;
+#pdpMainWrap {
     position: relative;
     overflow: hidden;
     background: #f5f5f5;
     border-radius: 4px;
     cursor: zoom-in;
     aspect-ratio: 3/4;
-    max-height: 600px;
+    max-height: 620px;
 }
-.main-image-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+#pdpMainWrap #pdpMainImg {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
     transition: transform .4s ease;
 }
-.main-image-wrap:hover img {
-    transform: scale(1.08);
-}
+#pdpMainWrap:hover #pdpMainImg { transform: scale(1.06); }
 
-/* Colour swatches */
-.colour-swatches-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: flex-end;
+/* ── Colour swatches ── */
+#pdpColourSwatches {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    align-items: flex-end !important;
+    padding: 4px 0;
 }
-.swatch-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+.pdp-swatch-btn {
+    display: inline-flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 5px !important;
+    background: none !important;
+    border: none !important;
+    padding: 4px !important;
     cursor: pointer;
+    text-decoration: none !important;
 }
-.swatch-item .swatch-name {
-    font-size: 10px;
-    color: #888;
-    text-align: center;
-    max-width: 48px;
+.pdp-swatch-circle {
+    display: block !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    border: 2px solid #d0d0d0 !important;
+    transition: transform .15s;
+    flex-shrink: 0 !important;
+}
+.pdp-swatch-btn:hover .pdp-swatch-circle { transform: scale(1.12); }
+.pdp-swatch-btn.active .pdp-swatch-circle {
+    outline: 3px solid #111 !important;
+    outline-offset: 3px !important;
+    border-color: #fff !important;
+}
+.pdp-swatch-label {
+    font-size: 10px !important;
+    color: #888 !important;
+    max-width: 50px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: color .15s;
+    text-align: center;
+    line-height: 1.2;
 }
-.swatch-item.selected .swatch-name { color: #111; font-weight: 600; }
-.colour-swatch {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid #ddd;
-    cursor: pointer;
-    transition: transform .15s;
-    position: relative;
-    /* NO overflow:hidden here — it clips the outline */
-}
-.colour-swatch:hover { transform: scale(1.1); }
-.colour-swatch.selected {
-    outline: 3px solid #111;
-    outline-offset: 2px;
-    border-color: #fff;
-}
-.colour-swatch img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-    overflow: hidden;
-    display: block;
-}
+.pdp-swatch-btn.active .pdp-swatch-label { color: #111 !important; font-weight: 700 !important; }
 
-/* Size buttons */
-.size-btn {
-    min-width: 52px;
-    height: 44px;
-    border: 1.5px solid #ccc;
-    background: #fff;
-    color: #111;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: 4px;
+/* ── Size buttons ── */
+.pdp-size-btn {
+    min-width: 50px !important;
+    height: 44px !important;
+    border: 1.5px solid #ccc !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
     cursor: pointer;
     transition: all .15s;
     position: relative;
+    padding: 0 10px !important;
 }
-.size-btn:hover:not(.disabled):not(.selected) {
-    border-color: #111;
-}
-.size-btn.selected {
-    background: #111;
-    color: #fff;
-    border-color: #111;
-}
-.size-btn.disabled {
-    color: #bbb;
-    border-color: #e5e5e5;
-    cursor: not-allowed;
-}
-.size-btn.disabled::after {
+.pdp-size-btn:hover:not(.oos):not(.sel) { border-color: #111 !important; }
+.pdp-size-btn.sel { background: #111 !important; color: #fff !important; border-color: #111 !important; }
+.pdp-size-btn.oos { color: #bbb !important; border-color: #e5e5e5 !important; cursor: not-allowed; }
+.pdp-size-btn.oos::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
+    top: 50%; left: 0; right: 0;
     height: 1.5px;
-    background: #ccc;
-    transform: rotate(-30deg);
+    background: #d0d0d0;
+    transform: rotate(-25deg);
 }
 
-/* Add to bag button */
-.btn-add-bag {
-    background: #111;
-    color: #fff;
-    border: none;
-    padding: 16px 32px;
-    font-size: 15px;
-    font-weight: 700;
+/* ── Add to bag ── */
+#pdpAddBtn {
+    background: #111 !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 16px 32px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
     letter-spacing: .5px;
-    border-radius: 4px;
-    width: 100%;
+    border-radius: 4px !important;
+    width: 100% !important;
     cursor: pointer;
     transition: background .2s;
+    display: block !important;
 }
-.btn-add-bag:hover:not(:disabled) { background: #333; }
-.btn-add-bag:disabled { background: #999; cursor: not-allowed; }
+#pdpAddBtn:hover:not(:disabled) { background: #333 !important; }
+#pdpAddBtn:disabled { background: #999 !important; cursor: not-allowed; }
 
-/* Accordion */
-.product-accordion .accordion-button {
-    font-weight: 600;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    background: none;
-    color: #111;
-    padding: 16px 0;
-    border-bottom: 1px solid #e5e5e5;
-    box-shadow: none;
+/* ── Accordion ── */
+#pdpAccordion .accordion-button {
+    font-weight: 600; font-size: 14px;
+    text-transform: uppercase; letter-spacing: .5px;
+    background: none !important; color: #111 !important;
+    padding: 16px 0; border-bottom: 1px solid #e5e5e5; box-shadow: none !important;
 }
-.product-accordion .accordion-button::after { filter: none; }
-.product-accordion .accordion-button:not(.collapsed) { color: #111; background: none; }
-.product-accordion .accordion-item { border: none; border-top: 1px solid #e5e5e5; }
-.product-accordion .accordion-body { padding: 16px 0; color: #444; font-size: 14px; line-height: 1.7; }
+#pdpAccordion .accordion-button:not(.collapsed) { color: #111 !important; background: none !important; }
+#pdpAccordion .accordion-item { border: none !important; border-top: 1px solid #e5e5e5 !important; }
+#pdpAccordion .accordion-body { padding: 16px 0; color: #444; font-size: 14px; line-height: 1.7; }
 
-/* Care icons */
-.care-icons span { font-size: 22px; }
-
-/* Sticky bar (mobile) */
-.sticky-atc {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1050;
-    background: #fff;
+/* ── Sticky ATC (mobile) ── */
+#pdpStickyAtc {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 1050; background: #fff;
     border-top: 1px solid #e5e5e5;
-    padding: 12px 20px;
-    display: none;
+    padding: 12px 20px; display: none;
 }
-@media (max-width: 768px) {
-    .sticky-atc { display: flex; gap: 12px; align-items: center; }
-    .thumb-strip { flex-direction: row; width: 100%; }
-    .thumb-strip .thumb { width: 64px; height: 64px; }
+#pdpStickyAtc .pdp-sticky-add {
+    background: #111 !important; color: #fff !important;
+    border: none !important; padding: 12px 24px !important;
+    font-size: 13px !important; font-weight: 700 !important;
+    border-radius: 4px !important; cursor: pointer;
+}
+
+@media (max-width: 767px) {
+    #pdpStickyAtc { display: flex; gap: 12px; align-items: center; }
+    #pdpGallery { grid-template-columns: 1fr !important; }
+    #pdpThumbStrip { flex-direction: row !important; }
+    #pdpThumbStrip img { width: 60px !important; height: 60px !important; }
     .product-detail-col { padding-bottom: 80px; }
 }
 
-/* Related products */
-.related-card { border: none; border-radius: 4px; overflow: hidden; transition: box-shadow .2s; }
-.related-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.1); }
-.related-card .card-img-top { aspect-ratio: 3/4; object-fit: cover; }
+/* ── Related cards ── */
+.pdp-related-card { border: none; border-radius: 4px; overflow: hidden; transition: box-shadow .2s; }
+.pdp-related-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.12); }
+.pdp-related-card img { aspect-ratio: 3/4; object-fit: cover; width: 100%; display: block; }
 </style>
 @endpush
 
 @section('content')
-<div class="product-page">
+<div id="pdpWrap">
 <div class="container py-4 py-lg-5">
 
     {{-- Breadcrumb --}}
@@ -265,34 +249,31 @@
         if (empty($initialImages)) $initialImages = [];
     @endphp
 
-    <div class="row g-5">
+    <div class="row g-4">
 
         {{-- ── LEFT: Image Gallery ──────────────────────────────── --}}
         <div class="col-lg-7">
-            <div class="d-flex gap-3">
+            <div id="pdpGallery" class="{{ count($initialImages) <= 1 ? 'no-thumbs' : '' }}">
 
                 {{-- Vertical thumbs --}}
-                @if(count($initialImages) > 1)
-                <div class="thumb-strip" id="thumbStrip">
+                <div id="pdpThumbStrip" style="{{ count($initialImages) <= 1 ? 'display:none!important' : '' }}">
                     @foreach($initialImages as $i => $img)
                     @php $thumbSrc = Str::startsWith($img, 'http') ? $img : asset('storage/' . $img); @endphp
                     <img src="{{ $thumbSrc }}"
-                         class="thumb {{ $i === 0 ? 'active' : '' }}"
+                         class="{{ $i === 0 ? 'active' : '' }}"
                          alt="{{ $product->name }}"
-                         onclick="switchMainImage(this, '{{ $thumbSrc }}')"
+                         onclick="pdpSwitchMain(this, '{{ $thumbSrc }}')"
                          loading="lazy">
                     @endforeach
                 </div>
-                @endif
 
                 {{-- Main image --}}
-                <div class="main-image-wrap" id="mainImageWrap">
+                <div id="pdpMainWrap">
                     @if(!empty($initialImages))
                         @php $mainSrc = Str::startsWith($initialImages[0], 'http') ? $initialImages[0] : asset('storage/' . $initialImages[0]); @endphp
-                        <img src="{{ $mainSrc }}"
-                             id="mainImage" alt="{{ $product->name }}">
+                        <img src="{{ $mainSrc }}" id="pdpMainImg" alt="{{ $product->name }}">
                     @else
-                        <div class="d-flex align-items-center justify-content-center h-100 text-muted" id="mainImage" style="min-height:300px">
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:300px;color:#bbb">
                             <i class="bi bi-image" style="font-size:4rem"></i>
                         </div>
                     @endif
@@ -334,25 +315,27 @@
             {{-- ── COLOUR SELECTOR ─────────────────────────────── --}}
             @if($hasVariants && count($colorMeta) > 0)
             <div class="mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="fw-semibold" style="font-size:13px;text-transform:uppercase;letter-spacing:.5px">
-                        Colour: <span id="selectedColourLabel" class="fw-normal text-muted">{{ $firstColor }}</span>
-                    </span>
-                </div>
-                <div class="colour-swatches-wrap" id="colourSwatches">
+                <p style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">
+                    Colour: <span id="selectedColourLabel" style="font-weight:400;color:#666">{{ $firstColor }}</span>
+                </p>
+                <div id="pdpColourSwatches">
                     @foreach($colorMeta as $cName => $cData)
-                    <div class="swatch-item {{ $loop->first ? 'selected' : '' }}"
-                         data-colour="{{ $cName }}"
-                         onclick="selectColour('{{ $cName }}')">
-                        <div class="colour-swatch {{ $loop->first ? 'selected' : '' }}"
-                             style="background-color: {{ $cData['hex'] ?? '#cccccc' }};"
-                             title="{{ $cName }}">
+                    @php $hex = $cData['hex'] ?? '#cccccc'; @endphp
+                    <button type="button"
+                            class="pdp-swatch-btn {{ $loop->first ? 'active' : '' }}"
+                            data-colour="{{ $cName }}"
+                            onclick="pdpSelectColour('{{ $cName }}')"
+                            title="{{ $cName }}">
+                        <span class="pdp-swatch-circle"
+                              style="background-color:{{ $hex }};">
                             @if($cData['swatch'])
-                                <img src="{{ asset('storage/' . $cData['swatch']) }}" alt="{{ $cName }}">
+                            <img src="{{ asset('storage/' . $cData['swatch']) }}"
+                                 alt="{{ $cName }}"
+                                 style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">
                             @endif
-                        </div>
-                        <span class="swatch-name">{{ $cName }}</span>
-                    </div>
+                        </span>
+                        <span class="pdp-swatch-label">{{ $cName }}</span>
+                    </button>
                     @endforeach
                 </div>
             </div>
@@ -369,30 +352,30 @@
                         Size Guide
                     </button>
                 </div>
-                <div class="d-flex flex-wrap gap-2" id="sizeButtons">
+                <div style="display:flex;flex-wrap:wrap;gap:8px" id="pdpSizeButtons">
                     {{-- Rendered by JS based on selected colour --}}
                 </div>
-                <div class="mt-2 small text-danger d-none" id="sizeError">Please select a size.</div>
+                <div class="mt-2 small text-danger d-none" id="pdpSizeError">Please select a size.</div>
             </div>
             @endif
 
             {{-- Stock notice --}}
-            <div id="stockNotice" class="mb-3 small"></div>
+            <div id="pdpStockNotice" class="mb-3" style="font-size:13px"></div>
 
             {{-- ── ADD TO CART ──────────────────────────────────── --}}
             <form id="addToCartForm" action="{{ route('shop.cart.add') }}" method="POST" class="mb-4">
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $product->id }}">
-                <input type="hidden" name="variant_id" id="selectedVariantId" value="">
+                <input type="hidden" name="variant_id" id="pdpVariantId" value="">
                 <input type="hidden" name="quantity" value="1">
-                <button type="submit" class="btn-add-bag" id="addToBagBtn"
+                <button type="submit" id="pdpAddBtn"
                     {{ !$hasVariants && !$product->isInStock() ? 'disabled' : '' }}>
                     {{ !$hasVariants && !$product->isInStock() ? 'OUT OF STOCK' : 'ADD TO BAG' }}
                 </button>
             </form>
 
             {{-- ── ACCORDION: Product Details ─────────────────── --}}
-            <div class="accordion product-accordion" id="productAccordion">
+            <div class="accordion" id="pdpAccordion">
 
                 @if($product->description)
                 <div class="accordion-item">
@@ -401,7 +384,7 @@
                             Description
                         </button>
                     </h2>
-                    <div id="collapseDesc" class="accordion-collapse collapse show" data-bs-parent="#productAccordion">
+                    <div id="collapseDesc" class="accordion-collapse collapse show" data-bs-parent="#pdpAccordion">
                         <div class="accordion-body">
                             {!! nl2br(e($product->description)) !!}
                         </div>
@@ -415,7 +398,7 @@
                             Fabric & Care
                         </button>
                     </h2>
-                    <div id="collapseFabric" class="accordion-collapse collapse" data-bs-parent="#productAccordion">
+                    <div id="collapseFabric" class="accordion-collapse collapse" data-bs-parent="#pdpAccordion">
                         <div class="accordion-body">
                             @if($product->weight)
                                 <p><strong>Weight:</strong> {{ $product->weight }} kg</p>
@@ -465,7 +448,7 @@
                             Shipping & Returns
                         </button>
                     </h2>
-                    <div id="collapseShipping" class="accordion-collapse collapse" data-bs-parent="#productAccordion">
+                    <div id="collapseShipping" class="accordion-collapse collapse" data-bs-parent="#pdpAccordion">
                         <div class="accordion-body">
                             <p>Orders are dispatched within 1–3 business days. Standard delivery 3–7 business days.</p>
                             <p>Free shipping on orders over $100.</p>
@@ -489,7 +472,7 @@
             @foreach($related as $rp)
             <div class="col-6 col-md-3">
                 <a href="{{ route('shop.merchandise.show', $rp) }}" class="text-decoration-none text-dark">
-                    <div class="related-card card h-100">
+                    <div class="pdp-related-card card h-100">
                         @php $rImg = $rp->featured_image ?? $rp->images->first()?->image_path; @endphp
                         @if($rImg)
                             <img src="{{ asset('storage/' . $rImg) }}" class="card-img-top" alt="{{ $rp->name }}" loading="lazy">
@@ -519,7 +502,7 @@
     @endif
 
 </div>{{-- /container --}}
-</div>{{-- /product-page --}}
+</div>{{-- /pdpWrap --}}
 
 
 {{-- ── SIZE GUIDE MODAL ──────────────────────────────────────────────── --}}
@@ -567,221 +550,203 @@
 </div>
 
 {{-- ── STICKY ADD TO BAG (mobile) ────────────────────────────────────── --}}
-<div class="sticky-atc" id="stickyAtc">
-    <div class="flex-grow-1">
-        <div class="fw-semibold" style="font-size:13px">{{ $product->name }}</div>
-        <div id="stickyVariantLabel" class="text-muted" style="font-size:12px">Select colour & size</div>
+<div id="pdpStickyAtc">
+    <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $product->name }}</div>
+        <div id="pdpStickyLabel" style="font-size:12px;color:#888">Select colour &amp; size</div>
     </div>
-    <button class="btn-add-bag" style="width:auto;padding:12px 24px;font-size:13px" onclick="document.getElementById('addToCartForm').submit()">
-        ADD TO BAG
-    </button>
+    <button class="pdp-sticky-add" onclick="document.getElementById('addToCartForm').submit()">ADD TO BAG</button>
 </div>
 
 @push('scripts')
 <script>
-// ── Data from PHP ───────────────────────────────────────────────────────
-const colorVariants = @json($colorVariants);
-const colorImages   = @json($colorImages);
-const defaultImages = @json($defaultImages);
-const allImages     = { ...colorImages };  // colour → [paths]
+// ── Data injected from PHP ───────────────────────────────────────────────
+const pdpColorVariants = @json($colorVariants);
+const pdpColorImages   = @json($colorImages);
+const pdpDefaultImages = @json($defaultImages);
 
-let selectedColour = @json($firstColor);
-let selectedSize   = null;
-let selectedVariantId = null;
+let pdpColour    = @json($firstColor);
+let pdpSize      = null;
+let pdpVariantId = null;
 
-// ── Init ────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-    if (selectedColour) {
-        renderSizes(selectedColour);
-    }
-    setupStickyBar();
-});
-
-// ── Colour selection ────────────────────────────────────────────────────
-function selectColour(colour) {
-    selectedColour = colour;
-    selectedSize   = null;
-    selectedVariantId = null;
-
-    // Update swatch UI — toggle both wrapper and inner circle
-    document.querySelectorAll('.swatch-item').forEach(el => {
-        const active = el.dataset.colour === colour;
-        el.classList.toggle('selected', active);
-        const circle = el.querySelector('.colour-swatch');
-        if (circle) circle.classList.toggle('selected', active);
-    });
-    document.getElementById('selectedColourLabel').textContent = colour;
-
-    // Swap gallery images
-    const imgs = allImages[colour] || defaultImages;
-    updateGallery(imgs);
-
-    // Render sizes for this colour
-    renderSizes(colour);
-    resetAddBtn();
-}
-
-// ── Gallery swap ────────────────────────────────────────────────────────
-function imgSrc(path) {
-    // path may already be a full URL (from asset()) or a relative storage path
+// ── Helpers ──────────────────────────────────────────────────────────────
+function pdpImgSrc(path) {
+    if (!path) return '';
     if (path.startsWith('http') || path.startsWith('/storage/')) return path;
     return '/storage/' + path;
 }
 
-function updateGallery(images) {
-    const mainWrap = document.getElementById('mainImageWrap');
-    if (!mainWrap) return;
+// ── Init ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    if (pdpColour) pdpRenderSizes(pdpColour);
+    pdpResetBtn();
+    pdpStickyInit();
+});
 
-    let mainImg = document.getElementById('mainImage');
+// ── Colour select ─────────────────────────────────────────────────────────
+function pdpSelectColour(colour) {
+    pdpColour    = colour;
+    pdpSize      = null;
+    pdpVariantId = null;
 
-    if (images.length === 0) return;
+    // Update swatch buttons
+    document.querySelectorAll('#pdpColourSwatches .pdp-swatch-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.colour === colour);
+    });
+    const lbl = document.getElementById('selectedColourLabel');
+    if (lbl) lbl.textContent = colour;
 
-    // Ensure main img element exists
-    if (!mainImg) {
-        mainImg = document.createElement('img');
-        mainImg.id = 'mainImage';
-        mainImg.alt = '';
-        mainWrap.insertBefore(mainImg, mainWrap.firstChild);
-    }
-    mainImg.src = imgSrc(images[0]);
+    // Swap gallery
+    const imgs = pdpColorImages[colour] || pdpDefaultImages;
+    pdpUpdateGallery(imgs);
 
-    // Create or get thumb strip
-    let thumbStrip = document.getElementById('thumbStrip');
-    if (images.length > 1) {
-        if (!thumbStrip) {
-            thumbStrip = document.createElement('div');
-            thumbStrip.id = 'thumbStrip';
-            thumbStrip.className = 'thumb-strip';
-            mainWrap.parentNode.insertBefore(thumbStrip, mainWrap);
+    pdpRenderSizes(colour);
+    pdpResetBtn();
+}
+
+// ── Gallery ───────────────────────────────────────────────────────────────
+function pdpUpdateGallery(images) {
+    const gallery   = document.getElementById('pdpGallery');
+    const mainImg   = document.getElementById('pdpMainImg');
+    const thumbStrip = document.getElementById('pdpThumbStrip');
+    if (!gallery || !mainImg) return;
+
+    const hasMulti = images.length > 1;
+
+    if (images.length > 0) mainImg.src = pdpImgSrc(images[0]);
+
+    // Show/hide thumb strip column
+    if (thumbStrip) {
+        if (hasMulti) {
+            thumbStrip.style.removeProperty('display');
+            gallery.classList.remove('no-thumbs');
+            thumbStrip.innerHTML = '';
+            images.forEach((path, i) => {
+                const src = pdpImgSrc(path);
+                const img = document.createElement('img');
+                img.src     = src;
+                img.alt     = '';
+                img.loading = 'lazy';
+                if (i === 0) img.classList.add('active');
+                img.onclick = () => pdpSwitchMain(img, src);
+                thumbStrip.appendChild(img);
+            });
+        } else {
+            thumbStrip.style.display = 'none';
+            gallery.classList.add('no-thumbs');
         }
-        thumbStrip.innerHTML = '';
-        images.forEach((path, i) => {
-            const img = document.createElement('img');
-            const src = imgSrc(path);
-            img.src       = src;
-            img.className = 'thumb' + (i === 0 ? ' active' : '');
-            img.alt       = '';
-            img.loading   = 'lazy';
-            img.onclick   = () => switchMainImage(img, src);
-            thumbStrip.appendChild(img);
-        });
-    } else if (thumbStrip) {
-        thumbStrip.remove();
     }
 }
 
-function switchMainImage(thumb, src) {
-    document.getElementById('mainImage').src = src;
-    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+function pdpSwitchMain(thumb, src) {
+    const mainImg = document.getElementById('pdpMainImg');
+    if (mainImg) mainImg.src = src;
+    document.querySelectorAll('#pdpThumbStrip img').forEach(t => t.classList.remove('active'));
     thumb.classList.add('active');
 }
 
-// ── Size rendering ──────────────────────────────────────────────────────
-function renderSizes(colour) {
-    const container = document.getElementById('sizeButtons');
+// ── Size rendering ────────────────────────────────────────────────────────
+function pdpRenderSizes(colour) {
+    const container = document.getElementById('pdpSizeButtons');
     if (!container) return;
-
-    const sizes = colorVariants[colour] || {};
-    // Sort by size_order
+    const sizes  = pdpColorVariants[colour] || {};
     const sorted = Object.entries(sizes).sort((a, b) => a[1].order - b[1].order);
-
     container.innerHTML = '';
     sorted.forEach(([size, data]) => {
         const btn = document.createElement('button');
-        btn.type      = 'button';
-        btn.className = 'size-btn' + (data.stock === 0 ? ' disabled' : '');
+        btn.type        = 'button';
+        btn.className   = 'pdp-size-btn' + (data.stock === 0 ? ' oos' : '');
         btn.textContent = size;
         btn.dataset.size      = size;
         btn.dataset.variantId = data.id;
         btn.dataset.stock     = data.stock;
         btn.dataset.price     = data.price;
-        if (data.stock > 0) {
-            btn.onclick = () => selectSize(btn);
-        }
+        if (data.stock > 0) btn.onclick = () => pdpSelectSize(btn);
         container.appendChild(btn);
     });
 }
 
-// ── Size selection ──────────────────────────────────────────────────────
-function selectSize(btn) {
-    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
+// ── Size select ───────────────────────────────────────────────────────────
+function pdpSelectSize(btn) {
+    document.querySelectorAll('.pdp-size-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
 
-    selectedSize      = btn.dataset.size;
-    selectedVariantId = btn.dataset.variantId;
-    const stock       = parseInt(btn.dataset.stock);
-    const price       = parseFloat(btn.dataset.price);
+    pdpSize      = btn.dataset.size;
+    pdpVariantId = btn.dataset.variantId;
+    const stock  = parseInt(btn.dataset.stock);
+    const price  = parseFloat(btn.dataset.price);
 
-    document.getElementById('selectedSizeLabel').textContent = selectedSize;
-    document.getElementById('selectedVariantId').value = selectedVariantId;
-    document.getElementById('sizeError').classList.add('d-none');
+    const sizeLbl = document.getElementById('selectedSizeLabel');
+    if (sizeLbl) sizeLbl.textContent = pdpSize;
+    const varInput = document.getElementById('pdpVariantId');
+    if (varInput) varInput.value = pdpVariantId;
+    const errEl = document.getElementById('pdpSizeError');
+    if (errEl) errEl.classList.add('d-none');
 
-    // Update price display
+    // Price update
     const priceEl = document.getElementById('displayPrice');
     if (priceEl) priceEl.textContent = '$' + price.toFixed(2);
 
     // Stock notice
-    const notice = document.getElementById('stockNotice');
-    if (stock > 0 && stock <= 5) {
-        notice.innerHTML = `<span class="text-warning">⚠ Only ${stock} left in this size</span>`;
-    } else if (stock === 0) {
-        notice.innerHTML = '<span class="text-danger">Out of stock in this size</span>';
-    } else {
-        notice.innerHTML = '<span class="text-success">✓ In stock</span>';
+    const notice = document.getElementById('pdpStockNotice');
+    if (notice) {
+        if (stock > 0 && stock <= 5)
+            notice.innerHTML = '<span style="color:#e67e22">⚠ Only ' + stock + ' left in this size</span>';
+        else if (stock === 0)
+            notice.innerHTML = '<span style="color:#e74c3c">Out of stock in this size</span>';
+        else
+            notice.innerHTML = '<span style="color:#27ae60">✓ In stock</span>';
     }
 
-    // Enable add to bag
-    const addBtn = document.getElementById('addToBagBtn');
-    addBtn.disabled    = stock === 0;
-    addBtn.textContent = stock === 0 ? 'OUT OF STOCK' : 'ADD TO BAG';
+    const addBtn = document.getElementById('pdpAddBtn');
+    if (addBtn) { addBtn.disabled = stock === 0; addBtn.textContent = stock === 0 ? 'OUT OF STOCK' : 'ADD TO BAG'; }
 
-    // Update sticky bar
-    document.getElementById('stickyVariantLabel').textContent =
-        selectedColour + ' / ' + selectedSize;
+    const stickyLbl = document.getElementById('pdpStickyLabel');
+    if (stickyLbl) stickyLbl.textContent = (pdpColour || '') + ' / ' + pdpSize;
 }
 
-function resetAddBtn() {
-    const addBtn = document.getElementById('addToBagBtn');
+function pdpResetBtn() {
+    const addBtn = document.getElementById('pdpAddBtn');
     if (addBtn) { addBtn.disabled = true; addBtn.textContent = 'SELECT A SIZE'; }
-    const notice = document.getElementById('stockNotice');
+    const notice = document.getElementById('pdpStockNotice');
     if (notice) notice.innerHTML = '';
-    document.getElementById('selectedSizeLabel').textContent = 'Select a size';
-    document.getElementById('selectedVariantId').value = '';
-    document.getElementById('stickyVariantLabel').textContent = selectedColour ? selectedColour + ' / Select size' : 'Select colour & size';
+    const sizeLbl = document.getElementById('selectedSizeLabel');
+    if (sizeLbl) sizeLbl.textContent = 'Select a size';
+    const varInput = document.getElementById('pdpVariantId');
+    if (varInput) varInput.value = '';
+    const stickyLbl = document.getElementById('pdpStickyLabel');
+    if (stickyLbl) stickyLbl.textContent = pdpColour ? pdpColour + ' / Select size' : 'Select colour & size';
 }
 
-// ── Form submit guard ───────────────────────────────────────────────────
-document.getElementById('addToCartForm').addEventListener('submit', function(e) {
+// ── Form guard ────────────────────────────────────────────────────────────
+document.getElementById('addToCartForm').addEventListener('submit', function (e) {
     @if($hasVariants)
-    if (!selectedVariantId) {
+    if (!pdpVariantId) {
         e.preventDefault();
-        document.getElementById('sizeError').classList.remove('d-none');
-        document.getElementById('sizeButtons').scrollIntoView({behavior: 'smooth', block: 'center'});
+        const errEl = document.getElementById('pdpSizeError');
+        if (errEl) { errEl.classList.remove('d-none'); errEl.scrollIntoView({behavior:'smooth',block:'center'}); }
         return;
     }
     @endif
 });
 
-// ── Sticky bar on scroll (mobile) ───────────────────────────────────────
-function setupStickyBar() {
-    const stickyAtc = document.getElementById('stickyAtc');
-    if (!stickyAtc) return;
-    const addBtn = document.getElementById('addToBagBtn');
-    const observer = new IntersectionObserver(([entry]) => {
-        // Show sticky bar when the main add-to-bag button scrolls out of view
-        if (window.innerWidth <= 768) {
-            stickyAtc.style.display = entry.isIntersecting ? 'none' : 'flex';
-        }
-    }, { threshold: 0 });
-    if (addBtn) observer.observe(addBtn);
+// ── Sticky bar ────────────────────────────────────────────────────────────
+function pdpStickyInit() {
+    const sticky = document.getElementById('pdpStickyAtc');
+    const addBtn = document.getElementById('pdpAddBtn');
+    if (!sticky || !addBtn) return;
+    new IntersectionObserver(([entry]) => {
+        if (window.innerWidth <= 767)
+            sticky.style.display = entry.isIntersecting ? 'none' : 'flex';
+    }, { threshold: 0 }).observe(addBtn);
 }
 
-// Init: if no variants, enable the button immediately
 @if(!$hasVariants)
-document.getElementById('addToBagBtn').disabled = false;
-document.getElementById('addToBagBtn').textContent = 'ADD TO BAG';
+// No variants — enable button directly
+const _ab = document.getElementById('pdpAddBtn');
+if (_ab) { _ab.disabled = false; _ab.textContent = 'ADD TO BAG'; }
 @else
-resetAddBtn();
+pdpResetBtn();
 @endif
 </script>
 @endpush
