@@ -237,6 +237,14 @@
         $hasVariants = !empty($colorVariants);
         $firstColor  = $hasVariants ? array_key_first($colorVariants) : null;
 
+        // Build variant ID → image map (for swapping on size select)
+        $variantImages = [];
+        foreach ($product->variants as $v) {
+            if ($v->featured_image) {
+                $variantImages[$v->id] = $v->featured_image;
+            }
+        }
+
         // Default gallery: featured image + gallery images
         $defaultImages = [];
         if ($product->featured_image) $defaultImages[] = $product->featured_image;
@@ -561,9 +569,10 @@
 @push('scripts')
 <script>
 // ── Data injected from PHP ───────────────────────────────────────────────
-const pdpColorVariants = @json($colorVariants);
-const pdpColorImages   = @json($colorImages);
-const pdpDefaultImages = @json($defaultImages);
+const pdpColorVariants  = @json($colorVariants);
+const pdpColorImages    = @json($colorImages);
+const pdpDefaultImages  = @json($defaultImages);
+const pdpVariantImages  = @json($variantImages);  // variant_id → image_path
 
 let pdpColour    = @json($firstColor);
 let pdpSize      = null;
@@ -613,7 +622,11 @@ function pdpUpdateGallery(images) {
 
     const hasMulti = images.length > 1;
 
-    if (images.length > 0) mainImg.src = pdpImgSrc(images[0]);
+    if (images.length > 0) {
+        mainImg.src = pdpImgSrc(images[0]);
+        // Reset active thumb to first
+        document.querySelectorAll('#pdpThumbStrip img').forEach((t, i) => t.classList.toggle('active', i === 0));
+    }
 
     // Show/hide thumb strip column
     if (thumbStrip) {
@@ -703,6 +716,16 @@ function pdpSelectSize(btn) {
 
     const stickyLbl = document.getElementById('pdpStickyLabel');
     if (stickyLbl) stickyLbl.textContent = (pdpColour || '') + ' / ' + pdpSize;
+
+    // ── Swap main image to variant-specific photo if one exists ──────────
+    if (pdpVariantImages && pdpVariantImages[pdpVariantId]) {
+        const mainImg = document.getElementById('pdpMainImg');
+        if (mainImg) {
+            mainImg.src = pdpImgSrc(pdpVariantImages[pdpVariantId]);
+            // Deselect all thumbs — variant image isn't in the strip
+            document.querySelectorAll('#pdpThumbStrip img').forEach(t => t.classList.remove('active'));
+        }
+    }
 }
 
 function pdpResetBtn() {

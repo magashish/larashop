@@ -62,6 +62,7 @@
                         <th style="width:90px">Stock</th>
                         <th style="width:100px">+/- Price</th>
                         <th style="width:60px">Active</th>
+                        <th style="width:110px" title="Photo shown when this variant is selected">Variant Photo</th>
                         <th style="width:40px"></th>
                     </tr>
                 </thead>
@@ -78,6 +79,19 @@
                             <td><input type="number" name="variants[{{ $i }}][stock_quantity]" class="form-control form-control-sm" value="{{ $variant->stock_quantity }}" min="0" form="{{ $formId ?? 'productForm' }}"></td>
                             <td><input type="number" name="variants[{{ $i }}][price_adjustment]" class="form-control form-control-sm" value="{{ $variant->price_adjustment }}" step="0.01" form="{{ $formId ?? 'productForm' }}"></td>
                             <td class="text-center"><input type="checkbox" name="variants[{{ $i }}][is_active]" value="1" class="form-check-input" @checked($variant->is_active) form="{{ $formId ?? 'productForm' }}"></td>
+                            <td>
+                                @if($variant->featured_image)
+                                <div class="mb-1">
+                                    <img src="{{ asset('storage/' . $variant->featured_image) }}"
+                                         style="width:44px;height:44px;object-fit:cover;border-radius:4px;border:1px solid #dee2e6">
+                                </div>
+                                @endif
+                                <input type="file" name="variant_images[{{ $i }}]"
+                                       class="form-control form-control-sm p-0"
+                                       accept="image/*"
+                                       style="font-size:10px"
+                                       form="{{ $formId ?? 'productForm' }}">
+                            </td>
                             <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVariantRow(this)">×</button></td>
                         </tr>
                         @endforeach
@@ -147,6 +161,7 @@ function addVariantRow() {
         <td><input type="number" name="variants[${i}][stock_quantity]" class="form-control form-control-sm" value="0" min="0" form="${formId}"></td>
         <td><input type="number" name="variants[${i}][price_adjustment]" class="form-control form-control-sm" value="0" step="0.01" form="${formId}"></td>
         <td class="text-center"><input type="checkbox" name="variants[${i}][is_active]" value="1" class="form-check-input" checked form="${formId}"></td>
+        <td><input type="file" name="variant_images[${i}]" class="form-control form-control-sm p-0" accept="image/*" style="font-size:10px" form="${formId}"></td>
         <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVariantRow(this)">×</button></td>
     </tr>`;
     document.getElementById('variantRows').insertAdjacentHTML('beforeend', row);

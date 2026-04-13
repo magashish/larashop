@@ -185,7 +185,7 @@ class ProductController extends Controller
         // Delete variants that were removed in the UI
         $product->variants()->whereNotIn('id', $submittedIds)->delete();
 
-        foreach ($submitted as $data) {
+        foreach ($submitted as $index => $data) {
             $attrs = [
                 'shop_product_id'  => $product->id,
                 'color_name'       => $data['color_name'],
@@ -198,8 +198,22 @@ class ProductController extends Controller
                 'is_active'        => isset($data['is_active']),
             ];
 
+            // Handle per-variant image upload
+            $fileKey = "variant_images.{$index}";
+            if ($request->hasFile($fileKey)) {
+                $attrs['featured_image'] = $request->file($fileKey)
+                    ->store('shop/products/variants', 'public');
+            }
+
             if (!empty($data['id'])) {
-                ShopProductVariant::where('id', $data['id'])->update($attrs);
+                $variant = ShopProductVariant::find($data['id']);
+                if ($variant) {
+                    // Delete old image if a new one is being uploaded
+                    if (isset($attrs['featured_image']) && $variant->featured_image) {
+                        Storage::disk('public')->delete($variant->featured_image);
+                    }
+                    $variant->update($attrs);
+                }
             } else {
                 ShopProductVariant::create($attrs);
             }

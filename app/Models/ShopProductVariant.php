@@ -9,7 +9,8 @@ class ShopProductVariant extends Model
 {
     protected $fillable = [
         'shop_product_id', 'color_name', 'color_hex', 'color_swatch_image',
-        'size', 'size_order', 'sku', 'stock_quantity', 'price_adjustment', 'is_active',
+        'featured_image', 'size', 'size_order', 'sku', 'stock_quantity',
+        'price_adjustment', 'is_active',
     ];
 
     protected $casts = [
