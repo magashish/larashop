@@ -70,7 +70,7 @@
                     @if(isset($product))
                         @foreach($product->variants as $i => $variant)
                         <tr data-row="{{ $i }}">
-                            <td><input type="hidden" name="variants[{{ $i }}][id]" value="{{ $variant->id }}">
+                            <td><input type="hidden" name="variants[{{ $i }}][id]" value="{{ $variant->id }}" form="{{ $formId ?? 'productForm' }}">
                                 <input type="text" name="variants[{{ $i }}][color_name]" class="form-control form-control-sm" value="{{ $variant->color_name }}" placeholder="Black Stone" required form="{{ $formId ?? 'productForm' }}"></td>
                             <td><input type="color" name="variants[{{ $i }}][color_hex]" class="form-control form-control-sm p-1" value="{{ $variant->color_hex ?? '#000000' }}" form="{{ $formId ?? 'productForm' }}" style="height:34px"></td>
                             <td><input type="text" name="variants[{{ $i }}][size]" class="form-control form-control-sm" value="{{ $variant->size }}" placeholder="M" required form="{{ $formId ?? 'productForm' }}"></td>

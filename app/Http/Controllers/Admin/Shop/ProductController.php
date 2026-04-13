@@ -124,6 +124,9 @@ class ProductController extends Controller
             }
             $validated['featured_image'] = $request->file('featured_image')
                 ->store('shop/products', 'public');
+        } else {
+            // Don't overwrite the existing image with null
+            unset($validated['featured_image']);
         }
 
         $product->update($validated);
