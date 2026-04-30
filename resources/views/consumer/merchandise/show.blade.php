@@ -306,12 +306,15 @@
             @endif
 
             {{-- Price --}}
-            <div class="mb-4">
+            @php $baseDisplayPrice = $product->is_on_sale ? $product->sale_price : $product->price; @endphp
+            <div class="mb-4" id="pdpPriceBlock">
+                <span class="fs-4 fw-bold {{ $product->is_on_sale ? 'text-danger' : '' }}" id="pdpCurrentPrice">
+                    ${{ number_format($baseDisplayPrice, 2) }}
+                </span>
                 @if($product->is_on_sale)
-                    <span class="fs-4 fw-bold text-danger me-2">${{ number_format($product->sale_price, 2) }}</span>
-                    <span class="text-muted text-decoration-line-through">${{ number_format($product->price, 2) }}</span>
-                @else
-                    <span class="fs-4 fw-bold" id="displayPrice">${{ number_format($product->price, 2) }}</span>
+                <span class="text-muted text-decoration-line-through ms-2" id="pdpOriginalPrice">
+                    ${{ number_format($product->price, 2) }}
+                </span>
                 @endif
             </div>
 
@@ -573,6 +576,9 @@ const pdpColorVariants  = @json($colorVariants);
 const pdpColorImages    = @json($colorImages);
 const pdpDefaultImages  = @json($defaultImages);
 const pdpVariantImages  = @json($variantImages);  // variant_id → image_path
+const pdpBasePrice      = @json((float)$baseDisplayPrice);
+const pdpIsOnSale       = @json((bool)$product->is_on_sale);
+const pdpOrigPrice      = @json((float)$product->price);
 
 let pdpColour    = @json($firstColor);
 let pdpSize      = null;
@@ -588,7 +594,7 @@ function pdpImgSrc(path) {
 // ── Init ─────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
     if (pdpColour) pdpRenderSizes(pdpColour);
-    pdpResetBtn();
+    @if($hasVariants) pdpResetBtn(); @endif
     pdpStickyInit();
 });
 
@@ -697,7 +703,7 @@ function pdpSelectSize(btn) {
     if (errEl) errEl.classList.add('d-none');
 
     // Price update
-    const priceEl = document.getElementById('displayPrice');
+    const priceEl = document.getElementById('pdpCurrentPrice');
     if (priceEl) priceEl.textContent = '$' + price.toFixed(2);
 
     // Stock notice
@@ -739,6 +745,9 @@ function pdpResetBtn() {
     if (varInput) varInput.value = '';
     const stickyLbl = document.getElementById('pdpStickyLabel');
     if (stickyLbl) stickyLbl.textContent = pdpColour ? pdpColour + ' / Select size' : 'Select colour & size';
+    // Reset price display back to base price
+    const priceEl = document.getElementById('pdpCurrentPrice');
+    if (priceEl) priceEl.textContent = '$' + pdpBasePrice.toFixed(2);
 }
 
 // ── Form guard ────────────────────────────────────────────────────────────
