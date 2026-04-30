@@ -12,38 +12,77 @@
         </p>
 
         {{-- Colour Images --}}
+        {{-- Datalist of variant colour names — kept in sync by JS --}}
+        <datalist id="colourNameList">
+            @if(isset($product))
+                @foreach($product->variants->pluck('color_name')->unique() as $cn)
+                <option value="{{ $cn }}">
+                @endforeach
+            @endif
+        </datalist>
+
         <div class="mb-4">
-            <h6 class="fw-semibold mb-2">Colour-Specific Image Galleries</h6>
-            <p class="text-muted small">Upload images per colour. These swap when a customer selects that colour.</p>
+            <h6 class="fw-semibold mb-2"><i class="bi bi-images"></i> Colour-Specific Image Galleries</h6>
+            <p class="text-muted small mb-1">
+                Upload images per colour. The gallery swaps automatically when a customer selects that colour on the product page.
+                <strong>The colour name must exactly match the colour name used in the Variants table below.</strong>
+            </p>
             <div id="colorImagesContainer">
                 @if(isset($product))
                     @foreach($product->colorImages->groupBy('color_name') as $colorName => $images)
                     <div class="color-image-group border rounded p-3 mb-3">
-                        <div class="d-flex align-items-center gap-3 mb-2">
-                            <input type="text" name="color_image_groups[{{ $loop->index }}][color_name]"
-                                   class="form-control form-control-sm" style="max-width:180px"
-                                   value="{{ $colorName }}" placeholder="Colour name" form="{{ $formId ?? 'productForm' }}">
-                            <input type="file" name="color_image_groups[{{ $loop->index }}][images][]"
-                                   class="form-control form-control-sm" accept="image/*" multiple form="{{ $formId ?? 'productForm' }}">
-                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.color-image-group').remove()">×</button>
+                        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                            <div>
+                                <label class="form-label small fw-semibold mb-1">Colour Name</label>
+                                <input type="text"
+                                       name="color_image_groups[{{ $loop->index }}][color_name]"
+                                       list="colourNameList"
+                                       class="form-control form-control-sm colour-group-name"
+                                       style="min-width:160px"
+                                       value="{{ $colorName }}"
+                                       placeholder="e.g. Black Stone"
+                                       form="{{ $formId ?? 'productForm' }}">
+                            </div>
+                            <div class="flex-grow-1">
+                                <label class="form-label small fw-semibold mb-1">Add More Images</label>
+                                <input type="file"
+                                       name="color_image_groups[{{ $loop->index }}][images][]"
+                                       class="form-control form-control-sm"
+                                       accept="image/*" multiple
+                                       form="{{ $formId ?? 'productForm' }}">
+                            </div>
+                            <div class="align-self-end">
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        onclick="this.closest('.color-image-group').remove()"
+                                        title="Remove this colour group">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
                             @foreach($images as $img)
                             <div class="position-relative">
-                                <img src="{{ asset('storage/' . $img->image_path) }}" class="rounded" style="width:70px;height:70px;object-fit:cover;">
-                                <form action="{{ route('admin.shop.products.delete-color-image', $img) }}" method="POST" class="position-absolute top-0 end-0 m-0">
+                                <img src="{{ asset('storage/' . $img->image_path) }}"
+                                     class="rounded" style="width:80px;height:80px;object-fit:cover;border:1px solid #dee2e6">
+                                <form action="{{ route('admin.shop.products.delete-color-image', $img) }}" method="POST"
+                                      class="position-absolute top-0 end-0 m-0">
                                     @csrf @method('DELETE')
-                                    <button class="btn btn-danger btn-sm p-0 px-1" style="font-size:10px" onclick="return confirm('Remove?')">×</button>
+                                    <button class="btn btn-danger btn-sm p-0 px-1"
+                                            style="font-size:10px;line-height:1.4"
+                                            onclick="return confirm('Remove this image?')">×</button>
                                 </form>
                             </div>
                             @endforeach
                         </div>
+                        @if($images->count() === 0)
+                            <p class="text-muted small mt-1 mb-0">No images yet — upload files above.</p>
+                        @endif
                     </div>
                     @endforeach
                 @endif
             </div>
-            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addColorImageGroup()">
-                <i class="bi bi-plus"></i> Add Colour Image Group
+            <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="addColorImageGroup()">
+                <i class="bi bi-plus-circle"></i> Add Colour Image Group
             </button>
         </div>
 
@@ -71,7 +110,7 @@
                         @foreach($product->variants as $i => $variant)
                         <tr data-row="{{ $i }}">
                             <td><input type="hidden" name="variants[{{ $i }}][id]" value="{{ $variant->id }}" form="{{ $formId ?? 'productForm' }}">
-                                <input type="text" name="variants[{{ $i }}][color_name]" class="form-control form-control-sm" value="{{ $variant->color_name }}" placeholder="Black Stone" required form="{{ $formId ?? 'productForm' }}"></td>
+                                <input type="text" name="variants[{{ $i }}][color_name]" list="colourNameList" class="form-control form-control-sm" value="{{ $variant->color_name }}" placeholder="Black Stone" required form="{{ $formId ?? 'productForm' }}"></td>
                             <td><input type="color" name="variants[{{ $i }}][color_hex]" class="form-control form-control-sm p-1" value="{{ $variant->color_hex ?? '#000000' }}" form="{{ $formId ?? 'productForm' }}" style="height:34px"></td>
                             <td><input type="text" name="variants[{{ $i }}][size]" class="form-control form-control-sm" value="{{ $variant->size }}" placeholder="M" required form="{{ $formId ?? 'productForm' }}"></td>
                             <td><input type="number" name="variants[{{ $i }}][size_order]" class="form-control form-control-sm" value="{{ $variant->size_order }}" min="0" form="{{ $formId ?? 'productForm' }}"></td>
@@ -150,10 +189,34 @@ let variantRowIndex = {{ isset($product) ? $product->variants->count() : 0 }};
 let colorImageGroupIndex = {{ isset($product) ? $product->colorImages->groupBy('color_name')->count() : 0 }};
 const formId = '{{ $formId ?? "productForm" }}';
 
+// ── Datalist helpers ─────────────────────────────────────────────────────
+function syncColourDatalist() {
+    const dl = document.getElementById('colourNameList');
+    if (!dl) return;
+    const existing = new Set([...dl.options].map(o => o.value));
+    document.querySelectorAll('#variantRows input[name$="[color_name]"]').forEach(inp => {
+        const v = inp.value.trim();
+        if (v && !existing.has(v)) {
+            const opt = document.createElement('option');
+            opt.value = v;
+            dl.appendChild(opt);
+            existing.add(v);
+        }
+    });
+}
+
+// Debounced live-sync as user types in variant colour fields
+document.addEventListener('input', function (e) {
+    if (e.target.matches('#variantRows input[name$="[color_name]"]')) {
+        clearTimeout(window._colourSyncTimer);
+        window._colourSyncTimer = setTimeout(syncColourDatalist, 400);
+    }
+});
+
 function addVariantRow() {
     const i = variantRowIndex++;
     const row = `<tr data-row="${i}">
-        <td><input type="text" name="variants[${i}][color_name]" class="form-control form-control-sm" placeholder="Black Stone" required form="${formId}"></td>
+        <td><input type="text" name="variants[${i}][color_name]" class="form-control form-control-sm" list="colourNameList" placeholder="Black Stone" required form="${formId}"></td>
         <td><input type="color" name="variants[${i}][color_hex]" class="form-control form-control-sm p-1" value="#000000" form="${formId}" style="height:34px"></td>
         <td><input type="text" name="variants[${i}][size]" class="form-control form-control-sm" placeholder="M" required form="${formId}"></td>
         <td><input type="number" name="variants[${i}][size_order]" class="form-control form-control-sm" value="0" min="0" form="${formId}"></td>
@@ -172,13 +235,30 @@ function removeVariantRow(btn) {
 }
 
 function addColorImageGroup() {
+    syncColourDatalist();
     const i = colorImageGroupIndex++;
     const html = `<div class="color-image-group border rounded p-3 mb-3">
-        <div class="d-flex align-items-center gap-3 mb-2">
-            <input type="text" name="color_image_groups[${i}][color_name]" class="form-control form-control-sm" style="max-width:180px" placeholder="Colour name" form="${formId}">
-            <input type="file" name="color_image_groups[${i}][images][]" class="form-control form-control-sm" accept="image/*" multiple form="${formId}">
-            <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.color-image-group').remove()">×</button>
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+            <div>
+                <label class="form-label small fw-semibold mb-1">Colour Name</label>
+                <input type="text" name="color_image_groups[${i}][color_name]"
+                       list="colourNameList"
+                       class="form-control form-control-sm colour-group-name"
+                       style="min-width:160px" placeholder="e.g. Black Stone" form="${formId}">
+            </div>
+            <div class="flex-grow-1">
+                <label class="form-label small fw-semibold mb-1">Images</label>
+                <input type="file" name="color_image_groups[${i}][images][]"
+                       class="form-control form-control-sm" accept="image/*" multiple form="${formId}">
+            </div>
+            <div class="align-self-end">
+                <button type="button" class="btn btn-outline-danger btn-sm"
+                        onclick="this.closest('.color-image-group').remove()" title="Remove">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
         </div>
+        <p class="text-muted small mb-0">Images will appear here after saving.</p>
     </div>`;
     document.getElementById('colorImagesContainer').insertAdjacentHTML('beforeend', html);
 }
