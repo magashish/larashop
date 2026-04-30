@@ -773,11 +773,7 @@ function pdpStickyInit() {
     }, { threshold: 0 }).observe(addBtn);
 }
 
-@if(!$hasVariants)
-// No variants — enable button directly
-const _ab = document.getElementById('pdpAddBtn');
-if (_ab) { _ab.disabled = false; _ab.textContent = 'ADD TO BAG'; }
-@else
+@if($hasVariants)
 pdpResetBtn();
 @endif
 </script>
