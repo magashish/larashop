@@ -62,8 +62,7 @@
                     <div class="card-body pb-2">
                         <input type="hidden"
                                name="color_image_groups[{{ $gi }}][color_name]"
-                               value="{{ $cg['name'] }}"
-                               form="{{ $formId ?? 'productForm' }}">
+                               value="{{ $cg['name'] }}">
 
                         {{-- Existing images --}}
                         @if($cg['images']->count())
@@ -72,13 +71,10 @@
                             <div class="position-relative">
                                 <img src="{{ asset('storage/' . $img->image_path) }}"
                                      class="rounded" style="width:80px;height:80px;object-fit:cover;border:1px solid #dee2e6">
-                                <form action="{{ route('admin.shop.products.delete-color-image', $img) }}" method="POST"
-                                      class="position-absolute top-0 end-0 m-0">
-                                    @csrf @method('DELETE')
-                                    <button class="btn btn-danger btn-sm p-0 px-1"
-                                            style="font-size:10px;line-height:1.4"
-                                            onclick="return confirm('Remove this image?')">×</button>
-                                </form>
+                                <button type="button"
+                                        class="btn btn-danger btn-sm p-0 px-1 position-absolute top-0 end-0 m-0"
+                                        style="font-size:10px;line-height:1.4"
+                                        onclick="shopDeleteItem('{{ route('admin.shop.products.delete-color-image', $img) }}')">×</button>
                             </div>
                             @endforeach
                         </div>
@@ -94,8 +90,7 @@
                             <input type="file"
                                    name="color_image_groups[{{ $gi }}][images][]"
                                    class="form-control form-control-sm"
-                                   accept="image/*" multiple
-                                   form="{{ $formId ?? 'productForm' }}">
+                                   accept="image/*" multiple>
                         </div>
                     </div>
                 </div>
@@ -134,15 +129,15 @@
                     @if(isset($product))
                         @foreach($product->variants as $i => $variant)
                         <tr data-row="{{ $i }}">
-                            <td><input type="hidden" name="variants[{{ $i }}][id]" value="{{ $variant->id }}" form="{{ $formId ?? 'productForm' }}">
-                                <input type="text" name="variants[{{ $i }}][color_name]" list="colourNameList" class="form-control form-control-sm" value="{{ $variant->color_name }}" placeholder="Black Stone" required form="{{ $formId ?? 'productForm' }}"></td>
-                            <td><input type="color" name="variants[{{ $i }}][color_hex]" class="form-control form-control-sm p-1" value="{{ $variant->color_hex ?? '#000000' }}" form="{{ $formId ?? 'productForm' }}" style="height:34px"></td>
-                            <td><input type="text" name="variants[{{ $i }}][size]" class="form-control form-control-sm" value="{{ $variant->size }}" placeholder="M" required form="{{ $formId ?? 'productForm' }}"></td>
-                            <td><input type="number" name="variants[{{ $i }}][size_order]" class="form-control form-control-sm" value="{{ $variant->size_order }}" min="0" form="{{ $formId ?? 'productForm' }}"></td>
-                            <td><input type="text" name="variants[{{ $i }}][sku]" class="form-control form-control-sm" value="{{ $variant->sku }}" form="{{ $formId ?? 'productForm' }}"></td>
-                            <td><input type="number" name="variants[{{ $i }}][stock_quantity]" class="form-control form-control-sm" value="{{ $variant->stock_quantity }}" min="0" form="{{ $formId ?? 'productForm' }}"></td>
-                            <td><input type="number" name="variants[{{ $i }}][price_adjustment]" class="form-control form-control-sm" value="{{ $variant->price_adjustment }}" step="0.01" form="{{ $formId ?? 'productForm' }}"></td>
-                            <td class="text-center"><input type="checkbox" name="variants[{{ $i }}][is_active]" value="1" class="form-check-input" @checked($variant->is_active) form="{{ $formId ?? 'productForm' }}"></td>
+                            <td><input type="hidden" name="variants[{{ $i }}][id]" value="{{ $variant->id }}">
+                                <input type="text" name="variants[{{ $i }}][color_name]" list="colourNameList" class="form-control form-control-sm" value="{{ $variant->color_name }}" placeholder="Black Stone" required></td>
+                            <td><input type="color" name="variants[{{ $i }}][color_hex]" class="form-control form-control-sm p-1" value="{{ $variant->color_hex ?? '#000000' }}" style="height:34px"></td>
+                            <td><input type="text" name="variants[{{ $i }}][size]" class="form-control form-control-sm" value="{{ $variant->size }}" placeholder="M" required></td>
+                            <td><input type="number" name="variants[{{ $i }}][size_order]" class="form-control form-control-sm" value="{{ $variant->size_order }}" min="0"></td>
+                            <td><input type="text" name="variants[{{ $i }}][sku]" class="form-control form-control-sm" value="{{ $variant->sku }}"></td>
+                            <td><input type="number" name="variants[{{ $i }}][stock_quantity]" class="form-control form-control-sm" value="{{ $variant->stock_quantity }}" min="0"></td>
+                            <td><input type="number" name="variants[{{ $i }}][price_adjustment]" class="form-control form-control-sm" value="{{ $variant->price_adjustment }}" step="0.01"></td>
+                            <td class="text-center"><input type="checkbox" name="variants[{{ $i }}][is_active]" value="1" class="form-check-input" @checked($variant->is_active)></td>
                             <td>
                                 @if($variant->featured_image)
                                 <div class="mb-1">
@@ -154,7 +149,7 @@
                                        class="form-control form-control-sm p-0"
                                        accept="image/*"
                                        style="font-size:10px"
-                                       form="{{ $formId ?? 'productForm' }}">
+                                      >
                             </td>
                             <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVariantRow(this)">×</button></td>
                         </tr>
@@ -212,7 +207,6 @@
 <script>
 let variantRowIndex = {{ isset($product) ? $product->variants->count() : 0 }};
 let colorImageGroupIndex = {{ $allColorGroups->count() }};
-const formId = '{{ $formId ?? "productForm" }}';
 
 // ── Datalist helpers ─────────────────────────────────────────────────────
 function syncColourDatalist() {
@@ -241,15 +235,15 @@ document.addEventListener('input', function (e) {
 function addVariantRow() {
     const i = variantRowIndex++;
     const row = `<tr data-row="${i}">
-        <td><input type="text" name="variants[${i}][color_name]" class="form-control form-control-sm" list="colourNameList" placeholder="Black Stone" required form="${formId}"></td>
-        <td><input type="color" name="variants[${i}][color_hex]" class="form-control form-control-sm p-1" value="#000000" form="${formId}" style="height:34px"></td>
-        <td><input type="text" name="variants[${i}][size]" class="form-control form-control-sm" placeholder="M" required form="${formId}"></td>
-        <td><input type="number" name="variants[${i}][size_order]" class="form-control form-control-sm" value="0" min="0" form="${formId}"></td>
-        <td><input type="text" name="variants[${i}][sku]" class="form-control form-control-sm" form="${formId}"></td>
-        <td><input type="number" name="variants[${i}][stock_quantity]" class="form-control form-control-sm" value="0" min="0" form="${formId}"></td>
-        <td><input type="number" name="variants[${i}][price_adjustment]" class="form-control form-control-sm" value="0" step="0.01" form="${formId}"></td>
-        <td class="text-center"><input type="checkbox" name="variants[${i}][is_active]" value="1" class="form-check-input" checked form="${formId}"></td>
-        <td><input type="file" name="variant_images[${i}]" class="form-control form-control-sm p-0" accept="image/*" style="font-size:10px" form="${formId}"></td>
+        <td><input type="text" name="variants[${i}][color_name]" class="form-control form-control-sm" list="colourNameList" placeholder="Black Stone" required></td>
+        <td><input type="color" name="variants[${i}][color_hex]" class="form-control form-control-sm p-1" value="#000000" style="height:34px"></td>
+        <td><input type="text" name="variants[${i}][size]" class="form-control form-control-sm" placeholder="M" required></td>
+        <td><input type="number" name="variants[${i}][size_order]" class="form-control form-control-sm" value="0" min="0"></td>
+        <td><input type="text" name="variants[${i}][sku]" class="form-control form-control-sm"></td>
+        <td><input type="number" name="variants[${i}][stock_quantity]" class="form-control form-control-sm" value="0" min="0"></td>
+        <td><input type="number" name="variants[${i}][price_adjustment]" class="form-control form-control-sm" value="0" step="0.01"></td>
+        <td class="text-center"><input type="checkbox" name="variants[${i}][is_active]" value="1" class="form-check-input" checked></td>
+        <td><input type="file" name="variant_images[${i}]" class="form-control form-control-sm p-0" accept="image/*" style="font-size:10px"></td>
         <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVariantRow(this)">×</button></td>
     </tr>`;
     document.getElementById('variantRows').insertAdjacentHTML('beforeend', row);
@@ -271,7 +265,7 @@ function addColorImageGroup() {
                 <input type="text" name="color_image_groups[${i}][color_name]"
                        list="colourNameList"
                        class="form-control form-control-sm colour-group-name"
-                       style="max-width:200px" placeholder="Colour name (e.g. Black)" form="${formId}">
+                       style="max-width:200px" placeholder="Colour name (e.g. Black)">
             </div>
             <button type="button" class="btn btn-outline-danger btn-sm py-0"
                     onclick="this.closest('.color-image-group').remove()" title="Remove">
@@ -283,7 +277,7 @@ function addColorImageGroup() {
             <div>
                 <label class="form-label small fw-semibold mb-1">Upload images</label>
                 <input type="file" name="color_image_groups[${i}][images][]"
-                       class="form-control form-control-sm" accept="image/*" multiple form="${formId}">
+                       class="form-control form-control-sm" accept="image/*" multiple>
             </div>
         </div>
     </div>`;
@@ -303,14 +297,14 @@ function confirmBulkAdd() {
     document.querySelectorAll('.bulk-size-cb:checked').forEach(cb => {
         const i = variantRowIndex++;
         const row = `<tr data-row="${i}">
-            <td><input type="text" name="variants[${i}][color_name]" class="form-control form-control-sm" value="${colorName}" required form="${formId}"></td>
-            <td><input type="color" name="variants[${i}][color_hex]" class="form-control form-control-sm p-1" value="${colorHex}" form="${formId}" style="height:34px"></td>
-            <td><input type="text" name="variants[${i}][size]" class="form-control form-control-sm" value="${cb.value}" required form="${formId}"></td>
-            <td><input type="number" name="variants[${i}][size_order]" class="form-control form-control-sm" value="${cb.dataset.order}" min="0" form="${formId}"></td>
-            <td><input type="text" name="variants[${i}][sku]" class="form-control form-control-sm" form="${formId}"></td>
-            <td><input type="number" name="variants[${i}][stock_quantity]" class="form-control form-control-sm" value="${stock}" min="0" form="${formId}"></td>
-            <td><input type="number" name="variants[${i}][price_adjustment]" class="form-control form-control-sm" value="0" step="0.01" form="${formId}"></td>
-            <td class="text-center"><input type="checkbox" name="variants[${i}][is_active]" value="1" class="form-check-input" checked form="${formId}"></td>
+            <td><input type="text" name="variants[${i}][color_name]" class="form-control form-control-sm" value="${colorName}" required></td>
+            <td><input type="color" name="variants[${i}][color_hex]" class="form-control form-control-sm p-1" value="${colorHex}" style="height:34px"></td>
+            <td><input type="text" name="variants[${i}][size]" class="form-control form-control-sm" value="${cb.value}" required></td>
+            <td><input type="number" name="variants[${i}][size_order]" class="form-control form-control-sm" value="${cb.dataset.order}" min="0"></td>
+            <td><input type="text" name="variants[${i}][sku]" class="form-control form-control-sm"></td>
+            <td><input type="number" name="variants[${i}][stock_quantity]" class="form-control form-control-sm" value="${stock}" min="0"></td>
+            <td><input type="number" name="variants[${i}][price_adjustment]" class="form-control form-control-sm" value="0" step="0.01"></td>
+            <td class="text-center"><input type="checkbox" name="variants[${i}][is_active]" value="1" class="form-check-input" checked></td>
             <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVariantRow(this)">×</button></td>
         </tr>`;
         document.getElementById('variantRows').insertAdjacentHTML('beforeend', row);
