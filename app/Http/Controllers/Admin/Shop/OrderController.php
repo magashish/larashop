@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin\Shop;
 
 use App\Http\Controllers\Controller;
 use App\Models\ShopOrder;
+use App\Notifications\ShopOrderStatusNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class OrderController extends Controller
 {
@@ -47,11 +49,22 @@ class OrderController extends Controller
             'notes'           => 'nullable|string',
         ]);
 
+        $previousStatus = $order->status;
+
         if ($validated['status'] === 'shipped' && !$order->shipped_at) {
             $validated['shipped_at'] = now();
         }
 
         $order->update($validated);
+
+        if ($previousStatus !== $order->status) {
+            try {
+                Notification::route('mail', $order->billing_email)
+                    ->notify(new ShopOrderStatusNotification($order->load('items'), $previousStatus));
+            } catch (\Exception $e) {
+                \Log::error('Shop status email failed: ' . $e->getMessage(), ['order' => $order->id]);
+            }
+        }
 
         return back()->with('success', 'Order updated successfully.');
     }

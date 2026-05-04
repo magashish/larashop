@@ -11,6 +11,8 @@ use App\Models\ShopProductColorImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class ProductController extends Controller
 {
@@ -71,8 +73,7 @@ class ProductController extends Controller
         $validated['is_featured']      = $request->boolean('is_featured');
 
         if ($request->hasFile('featured_image')) {
-            $validated['featured_image'] = $request->file('featured_image')
-                ->store('shop/products', 'public');
+            $validated['featured_image'] = $this->storeAsWebp($request->file('featured_image'), 'shop/products');
         }
 
         $product = ShopProduct::create($validated);
@@ -122,8 +123,7 @@ class ProductController extends Controller
             if ($product->featured_image) {
                 Storage::disk('public')->delete($product->featured_image);
             }
-            $validated['featured_image'] = $request->file('featured_image')
-                ->store('shop/products', 'public');
+            $validated['featured_image'] = $this->storeAsWebp($request->file('featured_image'), 'shop/products');
         } else {
             // Don't overwrite the existing image with null
             unset($validated['featured_image']);
@@ -141,7 +141,28 @@ class ProductController extends Controller
 
     public function destroy(ShopProduct $product)
     {
+        $product->load('images', 'colorImages', 'variants');
+
+        if ($product->featured_image) {
+            Storage::disk('public')->delete($product->featured_image);
+        }
+
+        foreach ($product->images as $image) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+
+        foreach ($product->colorImages as $colorImage) {
+            Storage::disk('public')->delete($colorImage->image_path);
+        }
+
+        foreach ($product->variants as $variant) {
+            if ($variant->featured_image) {
+                Storage::disk('public')->delete($variant->featured_image);
+            }
+        }
+
         $product->delete();
+
         return redirect()->route('admin.shop.products.index')
             ->with('success', 'Product deleted successfully.');
     }
@@ -162,11 +183,23 @@ class ProductController extends Controller
 
     // ── Private helpers ────────────────────────────────────────────────────
 
+    private function storeAsWebp(\Illuminate\Http\UploadedFile $file, string $directory): string
+    {
+        $filename = Str::random(40) . '.webp';
+        $path     = $directory . '/' . $filename;
+
+        $manager = new ImageManager(new Driver());
+        $webp    = $manager->read($file->getPathname())->toWebp(90);
+        Storage::disk('public')->put($path, (string) $webp);
+
+        return $path;
+    }
+
     private function saveGalleryImages(Request $request, ShopProduct $product): void
     {
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('shop/products/gallery', 'public');
+                $path = $this->storeAsWebp($image, 'shop/products/gallery');
                 ShopProductImage::create([
                     'shop_product_id' => $product->id,
                     'image_path'      => $path,
@@ -204,8 +237,7 @@ class ProductController extends Controller
             // Handle per-variant image upload
             $fileKey = "variant_images.{$index}";
             if ($request->hasFile($fileKey)) {
-                $attrs['featured_image'] = $request->file($fileKey)
-                    ->store('shop/products/variants', 'public');
+                $attrs['featured_image'] = $this->storeAsWebp($request->file($fileKey), 'shop/products/variants');
             }
 
             if (!empty($data['id'])) {
@@ -239,7 +271,7 @@ class ProductController extends Controller
             }
             $existingCount = $product->colorImages()->where('color_name', $colorName)->count();
             foreach ($group['images'] as $i => $image) {
-                $path = $image->store('shop/products/colors', 'public');
+                $path = $this->storeAsWebp($image, 'shop/products/colors');
                 ShopProductColorImage::create([
                     'shop_product_id' => $product->id,
                     'color_name'      => $colorName,

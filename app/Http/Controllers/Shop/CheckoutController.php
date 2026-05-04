@@ -10,8 +10,11 @@ use App\Models\ShopOrderItem;
 use App\Models\ShopShippingRate;
 use App\Models\ShopShippingZone;
 use App\Models\ShopTaxRate;
+use App\Notifications\ShopNewOrderAdminNotification;
+use App\Notifications\ShopOrderConfirmationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 
@@ -48,9 +51,11 @@ class CheckoutController extends Controller
 
         $user = auth()->user();
 
+        $bodyClass = 'ecommerce-page checkout-page';
+
         return view('consumer.checkout.index', compact(
             'items', 'subtotal', 'discountAmount', 'coupon',
-            'shippingZones', 'taxRate', 'taxAmount', 'user'
+            'shippingZones', 'taxRate', 'taxAmount', 'user', 'bodyClass'
         ));
     }
 
@@ -254,6 +259,17 @@ class CheckoutController extends Controller
 
             DB::commit();
 
+            // Send emails — failure must not break the order
+            try {
+                Notification::route('mail', $order->billing_email)
+                    ->notify(new ShopOrderConfirmationNotification($order->load('items')));
+
+                Notification::route('mail', config('mail.from.address'))
+                    ->notify(new ShopNewOrderAdminNotification($order));
+            } catch (\Exception $e) {
+                \Log::error('Shop order email failed: ' . $e->getMessage(), ['order' => $order->id]);
+            }
+
             return redirect()->route('shop.checkout.success', $order->order_number)
                 ->with('success', 'Order placed successfully!');
         } catch (\Exception $e) {
@@ -268,6 +284,8 @@ class CheckoutController extends Controller
             ->with('items.product')
             ->firstOrFail();
 
-        return view('consumer.checkout.success', compact('order'));
+        $bodyClass = 'ecommerce-page checkout-success-page';
+
+        return view('consumer.checkout.success', compact('order', 'bodyClass'));
     }
 }

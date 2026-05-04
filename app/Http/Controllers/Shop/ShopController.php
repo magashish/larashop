@@ -62,7 +62,9 @@ class ShopController extends Controller
                 ->latest()->take(4)->get()
         );
 
-        return view('consumer.merchandise.index', compact('products', 'categories', 'featuredProducts'));
+        $bodyClass = 'ecommerce-page shop-index-page';
+
+        return view('consumer.merchandise.index', compact('products', 'categories', 'featuredProducts', 'bodyClass'));
     }
 
     public function show(ShopProduct $product)
@@ -79,6 +81,8 @@ class ShopController extends Controller
             ->where('shop_category_id', $product->shop_category_id)
             ->take(4)->get();
 
-        return view('consumer.merchandise.show', compact('product', 'related'));
+        $bodyClass = 'ecommerce-page product-page';
+
+        return view('consumer.merchandise.show', compact('product', 'related', 'bodyClass'));
     }
 }

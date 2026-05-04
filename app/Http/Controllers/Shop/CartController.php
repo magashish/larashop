@@ -39,7 +39,9 @@ class CartController extends Controller
             }
         }
 
-        return view('consumer.cart.index', compact('items', 'subtotal', 'discountAmount', 'coupon'));
+        $bodyClass = 'ecommerce-page cart-page';
+
+        return view('consumer.cart.index', compact('items', 'subtotal', 'discountAmount', 'coupon', 'bodyClass'));
     }
 
     public function add(Request $request)
