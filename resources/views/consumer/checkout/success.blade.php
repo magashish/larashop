@@ -61,12 +61,14 @@
                     </div>
                 </div>
 
-                <div class="d-flex gap-3 justify-content-center">
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
                     <a href="{{ route('shop.merchandise.index') }}" class="btn btn-dark rounded-pill px-5">
                         <i class="bi bi-bag me-2"></i>Continue Shopping
                     </a>
                     @auth
-                    <a href="{{ route('consumer') }}" class="btn btn-outline-secondary rounded-pill px-4">Go to Dashboard</a>
+                    <a href="{{ route('shop.account.orders') }}" class="btn btn-outline-dark rounded-pill px-4">
+                        <i class="bi bi-bag-check me-1"></i>My Orders
+                    </a>
                     @endauth
                 </div>
             </div>

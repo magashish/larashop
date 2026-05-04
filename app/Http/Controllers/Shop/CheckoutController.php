@@ -232,6 +232,13 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($items as $item) {
+                $meta = [];
+                if ($item->shop_product_variant_id) {
+                    $meta['variant_id']    = $item->shop_product_variant_id;
+                    $meta['variant_color'] = $item->variant_color;
+                    $meta['variant_size']  = $item->variant_size;
+                }
+
                 ShopOrderItem::create([
                     'shop_order_id'   => $order->id,
                     'shop_product_id' => $item->shop_product_id,
@@ -240,6 +247,7 @@ class CheckoutController extends Controller
                     'quantity'        => $item->quantity,
                     'unit_price'      => $item->unit_price,
                     'subtotal'        => $item->unit_price * $item->quantity,
+                    'meta'            => $meta ?: null,
                 ]);
 
                 // Decrement stock

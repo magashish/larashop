@@ -495,6 +495,7 @@ Route::post('/paypal/webhook', [PayPalController::class, 'webhook'])->name('payp
 |--------------------------------------------------------------------------
 */
 
+use App\Http\Controllers\Shop\AccountController;
 use App\Http\Controllers\Shop\ShopController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
@@ -504,6 +505,13 @@ use App\Http\Controllers\Admin\Shop\ShippingController as AdminShippingControlle
 use App\Http\Controllers\Admin\Shop\TaxController as AdminTaxController;
 use App\Http\Controllers\Admin\Shop\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\Shop\ShopCategoryController as AdminShopCategoryController;
+
+// ── Frontend: Account / Orders (auth required) ────────────────────────────
+Route::prefix('account')->name('shop.account.')->middleware('auth:web')->group(function () {
+    Route::get('/orders',                         [AccountController::class, 'index'])->name('orders');
+    Route::get('/orders/{order}',                 [AccountController::class, 'show'])->name('order');
+    Route::post('/orders/{order}/reorder',        [AccountController::class, 'reorder'])->name('reorder');
+});
 
 // ── Frontend: Public Shop ──────────────────────────────────────────────────
 Route::prefix('merchandise')->name('shop.merchandise.')->group(function () {
