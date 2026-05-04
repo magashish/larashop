@@ -9,21 +9,17 @@
     <link rel="icon" href="{{ asset('/images/exhale--logo.png') }}" sizes="48x48">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Laravel') }}</title>
-    {{-- <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"> --}}
-    {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"> 
 
-    <link defer href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link defer href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.css" rel="stylesheet">
+    {{-- Preconnect to external domains — eliminates repeated DNS+TCP+TLS round trips --}}
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
+    <link rel="dns-prefetch" href="https://js.stripe.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
-
-
-
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.css">
-    <link rel="stylesheet" type="text/css" href="https://www.xhale.com.au/build/assets/app-DbaZCfaT.css">
-    <link rel="stylesheet" type="text/css" href="https://www.xhale.com.au/build/assets/style-ESbPOoOf.css">
-    
-    {{-- @vite(['resources/sass/app.scss',  'resources/css/slick.css',  'resources/css/external.css',  'resources/css/style.css', 'resources/js/app.js']) --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.css">
 
     <!-- Vite CSS -->
     @vite([
@@ -153,7 +149,7 @@
 @endif
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-@if (url()->current() !== url('/subscription-package'))
+@if(request()->routeIs('shop.checkout*', 'shop.order*'))
 @include('global.stripe')
 @endif
 
@@ -205,7 +201,6 @@
 </script>
 
 
-@stack('scripts') 
 <script>
     window.appConfig = {
         routes: {

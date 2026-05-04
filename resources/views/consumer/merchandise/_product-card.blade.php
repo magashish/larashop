@@ -54,6 +54,8 @@
         </div>
     </div>
 </div>
-<style>
-.product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important; }
-</style>
+@once
+@push('styles')
+<style>.product-card:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(0,0,0,.12)!important}</style>
+@endpush
+@endonce

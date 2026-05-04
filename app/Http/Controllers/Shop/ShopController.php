@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\ShopProduct;
 use App\Models\ShopCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ShopController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ShopProduct::with(['category', 'images'])
+        // Eager-load variants to prevent N+1 in isInStock() called from product cards
+        $query = ShopProduct::with(['category', 'images', 'variants'])
             ->where('is_active', true);
 
         if ($request->filled('category')) {
@@ -43,15 +45,22 @@ class ShopController extends Controller
             default      => $query->latest(),
         };
 
-        $products   = $query->paginate(12)->withQueryString();
-        $categories = ShopCategory::where('is_active', true)
-            ->withCount(['products' => fn($q) => $q->where('is_active', true)])
-            ->orderBy('sort_order')->get();
+        $products = $query->paginate(12)->withQueryString();
 
-        $featuredProducts = ShopProduct::with('images')
-            ->where('is_active', true)
-            ->where('is_featured', true)
-            ->latest()->take(4)->get();
+        // Cache categories for 10 minutes — they change rarely
+        $categories = Cache::remember('shop_categories_nav', 600, fn() =>
+            ShopCategory::where('is_active', true)
+                ->withCount(['products' => fn($q) => $q->where('is_active', true)])
+                ->orderBy('sort_order')->get()
+        );
+
+        // Cache featured products for 10 minutes
+        $featuredProducts = Cache::remember('shop_featured_products', 600, fn() =>
+            ShopProduct::with('images')
+                ->where('is_active', true)
+                ->where('is_featured', true)
+                ->latest()->take(4)->get()
+        );
 
         return view('consumer.merchandise.index', compact('products', 'categories', 'featuredProducts'));
     }
@@ -64,7 +73,7 @@ class ShopController extends Controller
 
         $product->load(['category', 'images', 'variants', 'colorImages']);
 
-        $related = ShopProduct::with('images')
+        $related = ShopProduct::with(['images', 'variants'])
             ->where('is_active', true)
             ->where('id', '!=', $product->id)
             ->where('shop_category_id', $product->shop_category_id)
