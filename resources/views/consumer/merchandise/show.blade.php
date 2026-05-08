@@ -617,6 +617,7 @@
 @endif
 
 </div>{{-- /pdpWrap --}}
+@include('consumer.blocks.social-feeds')
 
 
 {{-- ── SIZE GUIDE MODAL ── --}}
