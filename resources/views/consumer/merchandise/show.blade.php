@@ -570,11 +570,10 @@
 {{-- ── MEMBERSHIP PROMO STRIP ── --}}
 <div class="pdp-member-strip">
     <div class="pdp-member-img"
-         style="background-image: url('{{ asset('images/membership-promo.jpg') }}');background-color:#e5e5e5;">
+         style="background-image: url('{{ asset('images/membership-promo.webp') }}');background-color:#e5e5e5;">
     </div>
     <div class="pdp-member-text">
-        <h2>Members get<br>more</h2>
-        <p>Log in to unlock exclusive member pricing, early access to sales, and free express shipping on every order.</p>
+        <p>it was popularised in the 1960s with the release of letraset sheets containing lorem ipsum passages, and more recently with desktop publishing software like aldus pagemaker including versions of lorem ipsum.</p>
         <a href="{{ route('login') }}" class="pdp-member-login-btn">Login</a>
     </div>
 </div>
