@@ -2,45 +2,7 @@
 
 @push('styles')
 <style>
-/* ── Hero ─────────────────────────────────────────────────────────────────── */
-.shop-hero {
-    position: relative;
-    height: 320px;
-    overflow: hidden;
-    background: #1a1a1a;
-}
-body.logged-in .shop-hero { margin-top: 0; }
-.shop-hero__img {
-    width: 100%; height: 100%;
-    object-fit: cover; object-position: center top;
-    opacity: .85;
-}
-.shop-hero__overlay {
-    position: absolute; inset: 0;
-    display: flex; align-items: center;
-    padding-left: clamp(1.5rem, 5vw, 4rem);
-}
-.shop-hero__tagline {
-    color: #FFD700;
-    font-size: clamp(.9rem, 2vw, 1.15rem);
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    margin-bottom: .4rem;
-    line-height: 1;
-}
-.shop-hero__title-strip {
-    background: #111;
-    color: #fff;
-    font-size: clamp(1.6rem, 4vw, 2.6rem);
-    font-weight: 900;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    padding: .45em 3.5em .45em 0;
-    margin-left: clamp(-1.5rem, -5vw, -4rem);
-    clip-path: polygon(0 0, calc(100% - 2rem) 0, 100% 100%, 0 100%);
-    line-height: 1.1;
-}
+
 
 /* ── Breadcrumb ───────────────────────────────────────────────────────────── */
 .shop-breadcrumb {
@@ -263,17 +225,18 @@ body.logged-in .shop-hero { margin-top: 0; }
 
 @section('content')
 
-{{-- ── HERO ─────────────────────────────────────────────────────────────── --}}
-<div class="shop-hero">
-    <img src="{{ asset('images/Xhale_team_shoot_-_Hero_Banner.webp') }}"
-         class="shop-hero__img" alt="Xhale Merch">
-    <div class="shop-hero__overlay">
-        <div>
-            <div class="shop-hero__tagline">Gear up with</div>
-            <div class="shop-hero__title-strip">Xhale Merch</div>
+<!-- Page Banner Sec Start -->
+<section class="image-banner-sec pb-0">
+    <div class="container">
+        <div class="inner-content">
+            <img src="{{ asset('images/shop.webp') }}"alt="Banner Image">
+        </div>
+        <div class="bg-title" style="max-width: fit-content;">
+            <div class="yellow-bg text-uppercase">GEAR UP WITH</div>
+            <div class="black-bg text-uppercase d-block"><h1>XHALE MERCH</h1></div>
         </div>
     </div>
-</div>
+</section>
 
 <div class="container">
 
@@ -531,5 +494,9 @@ body.logged-in .shop-hero { margin-top: 0; }
 </div>{{-- /container --}}
 
 <div style="margin-bottom: 3rem;"></div>
+
+
+@include('consumer.blocks.social-feeds')
+
 
 @endsection
