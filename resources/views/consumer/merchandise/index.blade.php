@@ -3,6 +3,10 @@
 @push('styles')
 <style>
 
+.shop-banner-sec {
+    margin-top: 44px;
+    padding: 0px !important;
+}
 
 /* ── Breadcrumb ───────────────────────────────────────────────────────────── */
 .shop-breadcrumb {
@@ -226,7 +230,7 @@
 @section('content')
 
 <!-- Page Banner Sec Start -->
-<section class="image-banner-sec pb-0">
+<section class="shop-banner-sec pb-0">
     <div class="container">
         <div class="inner-content">
             <img src="{{ asset('images/shop.webp') }}"alt="Banner Image">
