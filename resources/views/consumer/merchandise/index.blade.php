@@ -1,124 +1,421 @@
 @extends('layouts.consumer')
+
+@push('styles')
+<style>
+/* ── Hero ─────────────────────────────────────────────────────────────────── */
+.shop-hero {
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+    background: #1a1a1a;
+}
+body.logged-in .shop-hero { margin-top: 0; }
+.shop-hero__img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center top;
+    opacity: .85;
+}
+.shop-hero__overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center;
+    padding-left: clamp(1.5rem, 5vw, 4rem);
+}
+.shop-hero__tagline {
+    color: #FFD700;
+    font-size: clamp(.9rem, 2vw, 1.15rem);
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: .4rem;
+    line-height: 1;
+}
+.shop-hero__title-strip {
+    background: #111;
+    color: #fff;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 900;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .45em 3.5em .45em 0;
+    margin-left: clamp(-1.5rem, -5vw, -4rem);
+    clip-path: polygon(0 0, calc(100% - 2rem) 0, 100% 100%, 0 100%);
+    line-height: 1.1;
+}
+
+/* ── Breadcrumb ───────────────────────────────────────────────────────────── */
+.shop-breadcrumb {
+    font-size: .75rem;
+    letter-spacing: .08em;
+    color: #888;
+    text-transform: uppercase;
+    padding: 1rem 0 .25rem;
+}
+.shop-breadcrumb a { color: #888; text-decoration: none; }
+.shop-breadcrumb a:hover { color: #111; }
+.shop-breadcrumb .sep { margin: 0 .4em; }
+
+/* ── Page title ───────────────────────────────────────────────────────────── */
+.shop-page-title {
+    font-size: clamp(1.2rem, 3vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #111;
+}
+
+/* ── Sidebar / Accordion ──────────────────────────────────────────────────── */
+.shop-sidebar { }
+.shop-sidebar .accordion-item {
+    border: none;
+    border-bottom: 1px solid #ddd;
+    border-radius: 0 !important;
+}
+.shop-sidebar .accordion-button {
+    background: transparent;
+    color: #111;
+    font-weight: 700;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: .9rem 0;
+    box-shadow: none !important;
+}
+.shop-sidebar .accordion-button::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23111'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+.shop-sidebar .accordion-body { padding: 0 0 1rem; }
+
+/* Checkbox items */
+.shop-filter-check {
+    display: flex; align-items: center; gap: .6rem;
+    padding: .3rem 0; cursor: pointer;
+    font-size: .82rem; color: #333;
+    text-decoration: none;
+    transition: color .15s;
+}
+.shop-filter-check:hover { color: #111; }
+.shop-filter-check .check-box {
+    width: 15px; height: 15px; min-width: 15px;
+    border: 1.5px solid #aaa;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+}
+.shop-filter-check.active .check-box {
+    background: #111; border-color: #111;
+}
+.shop-filter-check.active .check-box::after {
+    content: '';
+    display: block; width: 5px; height: 8px;
+    border: 1.5px solid #fff; border-top: none; border-left: none;
+    transform: rotate(40deg) translateY(-1px);
+}
+.shop-filter-check.active { color: #111; font-weight: 600; }
+
+/* Price inputs */
+.shop-price-input {
+    border: none; border-bottom: 1px solid #aaa;
+    border-radius: 0; padding: .25rem 0;
+    font-size: .82rem; width: 100%;
+    outline: none;
+    background: transparent;
+}
+.shop-price-input:focus { border-color: #111; }
+.shop-price-apply {
+    font-size: .72rem; letter-spacing: .08em;
+    text-transform: uppercase; font-weight: 700;
+    background: #111; color: #fff;
+    border: none; padding: .4rem 1rem;
+    cursor: pointer; transition: opacity .2s;
+}
+.shop-price-apply:hover { opacity: .8; }
+
+/* Sort select */
+.shop-sort-select {
+    border: none; border-bottom: 1px solid #aaa;
+    border-radius: 0; padding: .25rem 0;
+    font-size: .82rem; width: 100%;
+    background: transparent; outline: none;
+    -webkit-appearance: none; appearance: none;
+    cursor: pointer;
+}
+
+/* ── Product grid ─────────────────────────────────────────────────────────── */
+.shop-products-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid #eee;
+}
+.shop-products-count { font-size: .78rem; color: #888; letter-spacing: .06em; text-transform: uppercase; }
+.shop-clear-link { font-size: .75rem; color: #888; text-decoration: underline; }
+
+/* ── Product Card ─────────────────────────────────────────────────────────── */
+.shop-card { text-decoration: none; color: inherit; display: block; }
+.shop-card__img-wrap {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #f4f4f4;
+}
+.shop-card__img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+}
+.shop-card:hover .shop-card__img { transform: scale(1.05); }
+
+.shop-card__badge {
+    position: absolute; top: .6rem; left: .6rem;
+    background: #e00;
+    color: #fff; font-size: .62rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: .2em .55em;
+}
+.shop-card__featured-badge {
+    position: absolute; top: .6rem; right: .6rem;
+    background: #FFD700; color: #111;
+    font-size: .62rem; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    padding: .2em .55em;
+}
+.shop-card__oos {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.45);
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: .75rem;
+}
+.shop-card__oos-label {
+    background: #111; color: #fff;
+    font-size: .65rem; letter-spacing: .1em;
+    text-transform: uppercase; font-weight: 700;
+    padding: .25em .8em;
+}
+.shop-card__quick-add {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #111; color: #fff;
+    text-align: center; font-size: .7rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: .5rem;
+    transform: translateY(100%);
+    transition: transform .25s ease;
+    border: none; width: 100%; cursor: pointer;
+}
+.shop-card:hover .shop-card__quick-add { transform: translateY(0); }
+
+.shop-card__info { padding: .65rem 0 .25rem; }
+.shop-card__name {
+    font-size: .75rem; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: #111; margin-bottom: .2rem;
+    line-height: 1.3;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.shop-card__price { font-size: .8rem; color: #444; }
+.shop-card__price-sale { color: #cc0000; font-weight: 700; }
+.shop-card__price-orig { text-decoration: line-through; color: #aaa; margin-left: .3em; font-size: .73rem; }
+
+/* "Select Options" hover label (variant products) */
+.shop-card__quick-add--link {
+    pointer-events: none;
+}
+
+/* Mobile adjustments */
+@media (max-width: 575px) {
+    .shop-hero { height: 220px; }
+    .shop-hero__title-strip { font-size: 1.4rem; padding-right: 2em; }
+    .shop-card__name { font-size: .7rem; }
+}
+</style>
+@endpush
+
 @section('content')
 
-<section class="image-banner-sec shopfilter-banner">
-    <div class="container">
-        <div class="inner-content">
-            <div class="bg-overlay" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 200px; display:flex; align-items:center; justify-content:center; border-radius: 12px;">
-                <div class="text-center text-white py-5">
-                    <h1 class="fw-bold display-5 mb-2">MERCHANDISE SHOP</h1>
-                    <p class="lead mb-0 opacity-75">Premium gear & apparel</p>
-                </div>
-            </div>
+{{-- ── HERO ─────────────────────────────────────────────────────────────── --}}
+<div class="shop-hero">
+    <img src="{{ asset('images/Xhale_team_shoot_-_Hero_Banner.webp') }}"
+         class="shop-hero__img" alt="Xhale Merch">
+    <div class="shop-hero__overlay">
+        <div>
+            <div class="shop-hero__tagline">Gear up with</div>
+            <div class="shop-hero__title-strip">Xhale Merch</div>
         </div>
     </div>
-</section>
+</div>
 
-<section class="py-5">
-    <div class="container">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+<div class="container">
+
+    {{-- ── BREADCRUMB ───────────────────────────────────────────────────────── --}}
+    <nav class="shop-breadcrumb">
+        <a href="{{ route('consumer') }}">Home</a>
+        <span class="sep">/</span>
+        <a href="{{ route('shop.merchandise.index') }}">Merch</a>
+        @if(request('category'))
+            @php $activeCat = $categories->firstWhere('slug', request('category')); @endphp
+            @if($activeCat)
+            <span class="sep">/</span>
+            <span>{{ $activeCat->name }}</span>
+            @endif
         @endif
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    </nav>
+
+    {{-- ── PAGE TITLE ───────────────────────────────────────────────────────── --}}
+    <h1 class="shop-page-title">
+        @if(request('search'))
+            Search: "{{ request('search') }}"
+        @elseif(isset($activeCat))
+            {{ $activeCat->name }}
+        @else
+            All Merch
         @endif
+    </h1>
 
-        <div class="row">
-            {{-- Sidebar Filters --}}
-            <div class="col-lg-3 mb-4">
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-body">
-                        <form method="GET" action="{{ route('shop.merchandise.index') }}" id="shopFilter">
-                            <h6 class="fw-bold text-uppercase mb-3">Filter Products</h6>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-3">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-3">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    @endif
 
-                            <div class="mb-3">
-                                <input type="text" name="search" class="form-control" placeholder="Search products..." value="{{ request('search') }}">
-                            </div>
+    <div class="row g-5">
 
-                            <h6 class="fw-semibold mb-2 small text-uppercase text-muted">Categories</h6>
-                            <ul class="list-unstyled mb-3">
-                                <li class="mb-1">
-                                    <a href="{{ route('shop.merchandise.index', array_merge(request()->except('category'), [])) }}"
-                                       class="text-decoration-none {{ !request('category') ? 'fw-bold text-dark' : 'text-secondary' }}">
-                                        All Products <span class="text-muted small">({{ $products->total() }})</span>
+        {{-- ── SIDEBAR ───────────────────────────────────────────────────────── --}}
+        <div class="col-lg-2 col-md-3">
+            <div class="shop-sidebar">
+                <form method="GET" action="{{ route('shop.merchandise.index') }}" id="shopFilterForm">
+
+                    {{-- Search (hidden input, triggered from navbar or top bar) --}}
+                    @if(request('search'))
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+                    @endif
+                    @if(request('sort'))
+                        <input type="hidden" name="sort" id="sortHidden" value="{{ request('sort') }}">
+                    @endif
+
+                    <div class="accordion accordion-flush" id="sidebarAccordion">
+
+                        {{-- Product Type (Categories) --}}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="hType">
+                                <button class="accordion-button {{ request('category') || true ? '' : 'collapsed' }}"
+                                        type="button" data-bs-toggle="collapse" data-bs-target="#colType">
+                                    Product Type
+                                </button>
+                            </h2>
+                            <div id="colType" class="accordion-collapse collapse show" data-bs-parent="#sidebarAccordion">
+                                <div class="accordion-body">
+                                    <a href="{{ route('shop.merchandise.index', array_merge(request()->except(['category','page']), [])) }}"
+                                       class="shop-filter-check {{ !request('category') ? 'active' : '' }}">
+                                        <span class="check-box"></span> All
                                     </a>
-                                </li>
-                                @foreach($categories as $cat)
-                                <li class="mb-1">
-                                    <a href="{{ route('shop.merchandise.index', array_merge(request()->except('category'), ['category' => $cat->slug])) }}"
-                                       class="text-decoration-none {{ request('category') === $cat->slug ? 'fw-bold text-dark' : 'text-secondary' }}">
-                                        {{ $cat->name }} <span class="text-muted small">({{ $cat->products_count }})</span>
+                                    @foreach($categories as $cat)
+                                    <a href="{{ route('shop.merchandise.index', array_merge(request()->except(['category','page']), ['category' => $cat->slug])) }}"
+                                       class="shop-filter-check {{ request('category') === $cat->slug ? 'active' : '' }}">
+                                        <span class="check-box"></span> {{ $cat->name }}
                                     </a>
-                                </li>
-                                @endforeach
-                            </ul>
-
-                            <h6 class="fw-semibold mb-2 small text-uppercase text-muted">Price Range</h6>
-                            <div class="row g-1 mb-3">
-                                <div class="col-6">
-                                    <input type="number" name="min_price" class="form-control form-control-sm" placeholder="Min $" value="{{ request('min_price') }}" min="0">
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" name="max_price" class="form-control form-control-sm" placeholder="Max $" value="{{ request('max_price') }}" min="0">
+                                    @endforeach
                                 </div>
                             </div>
-
-                            <h6 class="fw-semibold mb-2 small text-uppercase text-muted">Sort By</h6>
-                            <select name="sort" class="form-select form-select-sm mb-3">
-                                <option value="latest" @selected(request('sort','latest') === 'latest')>Latest</option>
-                                <option value="price_asc" @selected(request('sort') === 'price_asc')>Price: Low to High</option>
-                                <option value="price_desc" @selected(request('sort') === 'price_desc')>Price: High to Low</option>
-                                <option value="name" @selected(request('sort') === 'name')>Name A-Z</option>
-                                <option value="featured" @selected(request('sort') === 'featured')>Featured First</option>
-                            </select>
-
-                            <button type="submit" class="btn btn-dark w-100 btn-sm">Apply Filters</button>
-                            @if(request()->except(['page']))
-                                <a href="{{ route('shop.merchandise.index') }}" class="btn btn-outline-secondary w-100 btn-sm mt-2">Clear Filters</a>
-                            @endif
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Product Grid --}}
-            <div class="col-lg-9">
-                @if($featuredProducts->isNotEmpty() && !request()->except(['page']))
-                <div class="mb-4">
-                    <h6 class="fw-bold text-uppercase text-muted mb-3">Featured Products</h6>
-                    <div class="row g-3">
-                        @foreach($featuredProducts as $fp)
-                        <div class="col-md-3 col-6">
-                            @include('consumer.merchandise._product-card', ['product' => $fp])
                         </div>
-                        @endforeach
-                    </div>
-                    <hr class="my-4">
-                </div>
-                @endif
 
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-muted small">{{ $products->total() }} product(s)</span>
-                </div>
+                        {{-- Price Range --}}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="hPrice">
+                                <button class="accordion-button {{ (request('min_price') || request('max_price')) ? '' : 'collapsed' }}"
+                                        type="button" data-bs-toggle="collapse" data-bs-target="#colPrice">
+                                    Price Range
+                                </button>
+                            </h2>
+                            <div id="colPrice" class="accordion-collapse collapse {{ (request('min_price') || request('max_price')) ? 'show' : '' }}">
+                                <div class="accordion-body">
+                                    <div class="d-flex gap-2 mb-2">
+                                        <div style="flex:1;">
+                                            <label style="font-size:.65rem;color:#888;letter-spacing:.06em;text-transform:uppercase;">Min</label>
+                                            <input type="number" name="min_price" class="shop-price-input"
+                                                   placeholder="$0" value="{{ request('min_price') }}" min="0">
+                                        </div>
+                                        <div style="flex:1;">
+                                            <label style="font-size:.65rem;color:#888;letter-spacing:.06em;text-transform:uppercase;">Max</label>
+                                            <input type="number" name="max_price" class="shop-price-input"
+                                                   placeholder="Any" value="{{ request('max_price') }}" min="0">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="shop-price-apply mt-2">Apply</button>
+                                </div>
+                            </div>
+                        </div>
 
-                @if($products->isEmpty())
-                    <div class="text-center py-5">
-                        <i class="bi bi-bag-x fs-1 text-muted"></i>
-                        <p class="mt-3 text-muted">No products found. <a href="{{ route('shop.merchandise.index') }}">Browse all products</a></p>
+                        {{-- Sort --}}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="hSort">
+                                <button class="accordion-button collapsed"
+                                        type="button" data-bs-toggle="collapse" data-bs-target="#colSort">
+                                    Sort By
+                                </button>
+                            </h2>
+                            <div id="colSort" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    @php $sorts = ['latest'=>'Latest','price_asc'=>'Price: Low–High','price_desc'=>'Price: High–Low','name'=>'Name A–Z','featured'=>'Featured First']; @endphp
+                                    @foreach($sorts as $val => $label)
+                                    <a href="{{ route('shop.merchandise.index', array_merge(request()->except(['sort','page']), ['sort' => $val])) }}"
+                                       class="shop-filter-check {{ request('sort','latest') === $val ? 'active' : '' }}">
+                                        <span class="check-box"></span> {{ $label }}
+                                    </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>{{-- /accordion --}}
+
+                    @if(request()->except(['page']))
+                    <div class="mt-3">
+                        <a href="{{ route('shop.merchandise.index') }}"
+                           style="font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:#888;text-decoration:underline;">
+                            Clear All Filters
+                        </a>
                     </div>
-                @else
-                <div class="row g-3">
-                    @foreach($products as $product)
-                    <div class="col-md-4 col-6">
-                        @include('consumer.merchandise._product-card', ['product' => $product])
-                    </div>
-                    @endforeach
-                </div>
-                <div class="d-flex justify-content-center mt-4">{{ $products->links() }}</div>
-                @endif
+                    @endif
+
+                </form>
             </div>
         </div>
+
+        {{-- ── PRODUCT GRID ──────────────────────────────────────────────────── --}}
+        <div class="col-lg-10 col-md-9">
+
+            <div class="shop-products-header">
+                <span class="shop-products-count">{{ $products->total() }} product{{ $products->total() !== 1 ? 's' : '' }}</span>
+                @if(request()->except(['page']))
+                    <a href="{{ route('shop.merchandise.index') }}" class="shop-clear-link">Clear filters</a>
+                @endif
+            </div>
+
+            @if($products->isEmpty())
+                <div class="text-center py-5">
+                    <p style="font-size:.85rem;color:#aaa;letter-spacing:.08em;text-transform:uppercase;">No products found</p>
+                    <a href="{{ route('shop.merchandise.index') }}" style="font-size:.8rem;color:#111;text-decoration:underline;">Browse all products</a>
+                </div>
+            @else
+            <div class="row g-3">
+                @foreach($products as $product)
+                <div class="col-6 col-sm-4 col-md-3">
+                    @include('consumer.merchandise._product-card', ['product' => $product])
+                </div>
+                @endforeach
+            </div>
+
+            <div class="d-flex justify-content-center mt-5">
+                {{ $products->links() }}
+            </div>
+            @endif
+
+        </div>
     </div>
-</section>
+
+</div>{{-- /container --}}
+
+<div style="margin-bottom: 3rem;"></div>
 
 @endsection

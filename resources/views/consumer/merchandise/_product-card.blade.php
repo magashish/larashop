@@ -1,61 +1,55 @@
-<div class="card h-100 border-0 shadow-sm product-card" style="border-radius:12px; overflow:hidden; transition: transform 0.2s;">
-    <a href="{{ route('shop.merchandise.show', $product) }}" class="text-decoration-none">
-        <div class="position-relative overflow-hidden" style="height: 220px; background:#f8f9fa;">
+@php $cardUrl = route('shop.merchandise.show', $product); @endphp
+
+<div class="shop-card-wrap">
+    <a href="{{ $cardUrl }}" class="shop-card">
+        <div class="shop-card__img-wrap">
             @if($product->featured_image)
                 <img src="{{ asset('storage/' . $product->featured_image) }}"
-                     class="w-100 h-100 object-fit-cover"
-                     alt="{{ $product->name }}" loading="lazy">
+                     class="shop-card__img" alt="{{ $product->name }}" loading="lazy">
             @elseif($product->images->first())
                 <img src="{{ asset('storage/' . $product->images->first()->image_path) }}"
-                     class="w-100 h-100 object-fit-cover"
-                     alt="{{ $product->name }}" loading="lazy">
+                     class="shop-card__img" alt="{{ $product->name }}" loading="lazy">
             @else
-                <div class="d-flex align-items-center justify-content-center h-100 text-muted">
-                    <i class="bi bi-image fs-1"></i>
+                <div class="shop-card__img" style="display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-image text-muted" style="font-size:2rem;"></i>
                 </div>
             @endif
+
             @if($product->is_on_sale)
-                <span class="position-absolute top-0 start-0 m-2 badge bg-danger">SALE</span>
+                <span class="shop-card__badge">Sale</span>
             @endif
             @if($product->is_featured)
-                <span class="position-absolute top-0 end-0 m-2 badge bg-warning text-dark">⭐ Featured</span>
+                <span class="shop-card__featured-badge">★ Featured</span>
             @endif
+
             @if(!$product->isInStock())
-                <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-60 text-white text-center py-1 small">Out of Stock</div>
-            @endif
-        </div>
-    </a>
-    <div class="card-body d-flex flex-column p-3">
-        <p class="text-muted small mb-1">{{ $product->category?->name }}</p>
-        <h6 class="fw-semibold mb-2 text-dark" style="line-height:1.3">
-            <a href="{{ route('shop.merchandise.show', $product) }}" class="text-decoration-none text-dark">{{ $product->name }}</a>
-        </h6>
-        <div class="mt-auto">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    @if($product->is_on_sale)
-                        <span class="fw-bold text-danger">${{ number_format($product->sale_price, 2) }}</span>
-                        <small class="text-muted text-decoration-line-through ms-1">${{ number_format($product->price, 2) }}</small>
-                    @else
-                        <span class="fw-bold">${{ number_format($product->price, 2) }}</span>
-                    @endif
+                <div class="shop-card__oos">
+                    <span class="shop-card__oos-label">Out of Stock</span>
                 </div>
-                @if($product->isInStock())
-                <form action="{{ route('shop.cart.add') }}" method="POST">
+            @elseif($product->variants->isEmpty())
+                <form action="{{ route('shop.cart.add') }}" method="POST"
+                      onclick="event.stopPropagation();"
+                      style="position:absolute;bottom:0;left:0;right:0;">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="quantity" value="1">
-                    <button type="submit" class="btn btn-dark btn-sm rounded-pill px-3">
-                        <i class="bi bi-bag-plus"></i>
-                    </button>
+                    <button type="submit" class="shop-card__quick-add">+ Add to Cart</button>
                 </form>
+            @else
+                <span class="shop-card__quick-add shop-card__quick-add--link">Select Options</span>
+            @endif
+        </div>
+
+        <div class="shop-card__info">
+            <div class="shop-card__name" title="{{ $product->name }}">{{ $product->name }}</div>
+            <div class="shop-card__price">
+                @if($product->is_on_sale)
+                    <span class="shop-card__price-sale">${{ number_format($product->sale_price, 2) }}</span>
+                    <span class="shop-card__price-orig">${{ number_format($product->price, 2) }}</span>
+                @else
+                    ${{ number_format($product->price, 2) }}
                 @endif
             </div>
         </div>
-    </div>
+    </a>
 </div>
-@once
-@push('styles')
-<style>.product-card:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(0,0,0,.12)!important}</style>
-@endpush
-@endonce
