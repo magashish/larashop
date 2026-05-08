@@ -64,6 +64,7 @@ class ProductController extends Controller
             'images.*'           => 'nullable|image|max:2048',
             'is_active'          => 'boolean',
             'is_featured'        => 'boolean',
+            'gender'             => 'nullable|in:mens,womens,unisex,kids',
         ]);
 
         $validated['slug']             = Str::slug($validated['name']) . '-' . Str::random(5);
@@ -71,6 +72,7 @@ class ProductController extends Controller
         $validated['allow_backorders'] = $request->boolean('allow_backorders');
         $validated['is_active']        = $request->boolean('is_active', true);
         $validated['is_featured']      = $request->boolean('is_featured');
+        $validated['gender']           = $request->input('gender') ?: null;
 
         if ($request->hasFile('featured_image')) {
             $validated['featured_image'] = $this->storeAsWebp($request->file('featured_image'), 'shop/products');
@@ -112,12 +114,14 @@ class ProductController extends Controller
             'images.*'          => 'nullable|image|max:2048',
             'is_active'         => 'boolean',
             'is_featured'       => 'boolean',
+            'gender'            => 'nullable|in:mens,womens,unisex,kids',
         ]);
 
         $validated['track_stock']      = $request->boolean('track_stock');
         $validated['allow_backorders'] = $request->boolean('allow_backorders');
         $validated['is_active']        = $request->boolean('is_active', true);
         $validated['is_featured']      = $request->boolean('is_featured');
+        $validated['gender']           = $request->input('gender') ?: null;
 
         if ($request->hasFile('featured_image')) {
             if ($product->featured_image) {

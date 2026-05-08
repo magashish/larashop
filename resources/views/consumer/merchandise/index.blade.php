@@ -216,6 +216,37 @@ body.logged-in .shop-hero { margin-top: 0; }
 .shop-card__price-sale { color: #cc0000; font-weight: 700; }
 .shop-card__price-orig { text-decoration: line-through; color: #aaa; margin-left: .3em; font-size: .73rem; }
 
+/* Colour swatch dot */
+.colour-swatch {
+    display: inline-block;
+    width: 12px; height: 12px; min-width: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,.15);
+    vertical-align: middle;
+}
+
+/* Size pills grid */
+.size-grid {
+    display: flex; flex-wrap: wrap; gap: .35rem;
+}
+.size-pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 34px; height: 30px; padding: 0 .4rem;
+    border: 1.5px solid #ccc;
+    font-size: .68rem; font-weight: 600; letter-spacing: .04em;
+    text-decoration: none; color: #333;
+    transition: all .15s;
+}
+.size-pill:hover { border-color: #111; color: #111; }
+.size-pill.active { background: #111; border-color: #111; color: #fff; }
+
+/* Filter clear link */
+.shop-filter-clear {
+    font-size: .68rem; color: #aaa; text-decoration: none;
+    letter-spacing: .04em; margin-top: .5rem; display: inline-block;
+}
+.shop-filter-clear:hover { color: #111; }
+
 /* "Select Options" hover label (variant products) */
 .shop-card__quick-add--link {
     pointer-events: none;
@@ -315,6 +346,89 @@ body.logged-in .shop-hero { margin-top: 0; }
                                         <span class="check-box"></span> {{ $cat->name }}
                                     </a>
                                     @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Gender --}}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="hGender">
+                                <button class="accordion-button {{ request('gender') ? '' : 'collapsed' }}"
+                                        type="button" data-bs-toggle="collapse" data-bs-target="#colGender">
+                                    Gender
+                                </button>
+                            </h2>
+                            <div id="colGender" class="accordion-collapse collapse {{ request('gender') ? 'show' : '' }}">
+                                <div class="accordion-body">
+                                    @php $genders = ['mens' => 'Mens', 'womens' => 'Womens', 'unisex' => 'Unisex', 'kids' => 'Kids']; @endphp
+                                    @foreach($genders as $val => $label)
+                                    <a href="{{ route('shop.merchandise.index', array_merge(request()->except(['gender','page']), ['gender' => $val])) }}"
+                                       class="shop-filter-check {{ request('gender') === $val ? 'active' : '' }}">
+                                        <span class="check-box"></span> {{ $label }}
+                                    </a>
+                                    @endforeach
+                                    @if(request('gender'))
+                                    <a href="{{ route('shop.merchandise.index', request()->except(['gender','page'])) }}"
+                                       class="shop-filter-clear">✕ Clear</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Colour Range --}}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="hColour">
+                                <button class="accordion-button {{ request('colour') ? '' : 'collapsed' }}"
+                                        type="button" data-bs-toggle="collapse" data-bs-target="#colColour">
+                                    Colour Range
+                                </button>
+                            </h2>
+                            <div id="colColour" class="accordion-collapse collapse {{ request('colour') ? 'show' : '' }}">
+                                <div class="accordion-body">
+                                    @forelse($availableColours as $colour)
+                                    <a href="{{ route('shop.merchandise.index', array_merge(request()->except(['colour','page']), ['colour' => $colour->color_name])) }}"
+                                       class="shop-filter-check {{ request('colour') === $colour->color_name ? 'active' : '' }}">
+                                        <span class="check-box"></span>
+                                        @if($colour->color_hex)
+                                        <span class="colour-swatch" style="background:{{ $colour->color_hex }};"></span>
+                                        @endif
+                                        {{ $colour->color_name }}
+                                    </a>
+                                    @empty
+                                    <span style="font-size:.75rem;color:#aaa;">No colours available</span>
+                                    @endforelse
+                                    @if(request('colour'))
+                                    <a href="{{ route('shop.merchandise.index', request()->except(['colour','page'])) }}"
+                                       class="shop-filter-clear">✕ Clear</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Size --}}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="hSize">
+                                <button class="accordion-button {{ request('size') ? '' : 'collapsed' }}"
+                                        type="button" data-bs-toggle="collapse" data-bs-target="#colSize">
+                                    Size
+                                </button>
+                            </h2>
+                            <div id="colSize" class="accordion-collapse collapse {{ request('size') ? 'show' : '' }}">
+                                <div class="accordion-body">
+                                    <div class="size-grid">
+                                        @forelse($availableSizes as $size)
+                                        <a href="{{ route('shop.merchandise.index', array_merge(request()->except(['size','page']), ['size' => $size])) }}"
+                                           class="size-pill {{ request('size') === $size ? 'active' : '' }}">
+                                            {{ $size }}
+                                        </a>
+                                        @empty
+                                        <span style="font-size:.75rem;color:#aaa;">No sizes available</span>
+                                        @endforelse
+                                    </div>
+                                    @if(request('size'))
+                                    <a href="{{ route('shop.merchandise.index', request()->except(['size','page'])) }}"
+                                       class="shop-filter-clear mt-2 d-block">✕ Clear</a>
+                                    @endif
                                 </div>
                             </div>
                         </div>

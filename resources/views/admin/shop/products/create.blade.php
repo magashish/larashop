@@ -17,7 +17,7 @@
                             <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
                             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label fw-semibold">Category</label>
                             <select name="shop_category_id" class="form-select">
                                 <option value="">— Uncategorised —</option>
@@ -26,7 +26,17 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option value="">— All / Unspecified —</option>
+                                <option value="mens"   @selected(old('gender') === 'mens')>Mens</option>
+                                <option value="womens" @selected(old('gender') === 'womens')>Womens</option>
+                                <option value="unisex" @selected(old('gender') === 'unisex')>Unisex</option>
+                                <option value="kids"   @selected(old('gender') === 'kids')>Kids</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label fw-semibold">SKU</label>
                             <input type="text" name="sku" class="form-control @error('sku') is-invalid @enderror" value="{{ old('sku') }}" placeholder="Auto-generated if empty">
                             @error('sku')<div class="invalid-feedback">{{ $message }}</div>@enderror

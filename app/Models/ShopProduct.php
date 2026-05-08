@@ -14,7 +14,7 @@ class ShopProduct extends Model
     protected $fillable = [
         'shop_category_id', 'name', 'slug', 'short_description', 'description',
         'price', 'sale_price', 'cost_price', 'sku', 'stock_quantity', 'track_stock',
-        'allow_backorders', 'weight', 'featured_image', 'is_active', 'is_featured', 'meta',
+        'allow_backorders', 'weight', 'featured_image', 'is_active', 'is_featured', 'gender', 'meta',
     ];
 
     protected $casts = [

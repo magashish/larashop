@@ -25,7 +25,7 @@
                             <label class="form-label fw-semibold">Product Name <span class="text-danger">*</span></label>
                             <input type="text" name="name" class="form-control" value="{{ old('name', $product->name) }}" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label fw-semibold">Category</label>
                             <select name="shop_category_id" class="form-select">
                                 <option value="">— Uncategorised —</option>
@@ -34,7 +34,17 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option value="">— All / Unspecified —</option>
+                                <option value="mens"   @selected(old('gender', $product->gender) === 'mens')>Mens</option>
+                                <option value="womens" @selected(old('gender', $product->gender) === 'womens')>Womens</option>
+                                <option value="unisex" @selected(old('gender', $product->gender) === 'unisex')>Unisex</option>
+                                <option value="kids"   @selected(old('gender', $product->gender) === 'kids')>Kids</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label fw-semibold">SKU</label>
                             <input type="text" name="sku" class="form-control" value="{{ old('sku', $product->sku) }}">
                         </div>

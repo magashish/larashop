@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\ShopProduct;
 use App\Models\ShopCategory;
+use App\Models\ShopProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -36,6 +37,18 @@ class ShopController extends Controller
             $query->where('price', '<=', $request->max_price);
         }
 
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->gender);
+        }
+
+        if ($request->filled('colour')) {
+            $query->whereHas('variants', fn($q) => $q->where('color_name', $request->colour)->where('is_active', true));
+        }
+
+        if ($request->filled('size')) {
+            $query->whereHas('variants', fn($q) => $q->where('size', $request->size)->where('is_active', true));
+        }
+
         $sort = $request->get('sort', 'latest');
         match ($sort) {
             'price_asc'  => $query->orderBy('price', 'asc'),
@@ -62,9 +75,37 @@ class ShopController extends Controller
                 ->latest()->take(4)->get()
         );
 
+        // Available colours and sizes for sidebar filters
+        $availableColours = Cache::remember('shop_filter_colours', 300, fn() =>
+            ShopProductVariant::join('shop_products', 'shop_product_variants.shop_product_id', '=', 'shop_products.id')
+                ->where('shop_products.is_active', true)
+                ->where('shop_product_variants.is_active', true)
+                ->whereNotNull('shop_product_variants.color_name')
+                ->where('shop_product_variants.color_name', '!=', '')
+                ->select('shop_product_variants.color_name', 'shop_product_variants.color_hex')
+                ->distinct()
+                ->orderBy('shop_product_variants.color_name')
+                ->get()
+        );
+
+        $availableSizes = Cache::remember('shop_filter_sizes', 300, fn() =>
+            ShopProductVariant::join('shop_products', 'shop_product_variants.shop_product_id', '=', 'shop_products.id')
+                ->where('shop_products.is_active', true)
+                ->where('shop_product_variants.is_active', true)
+                ->whereNotNull('shop_product_variants.size')
+                ->where('shop_product_variants.size', '!=', '')
+                ->select('shop_product_variants.size', 'shop_product_variants.size_order')
+                ->distinct()
+                ->orderBy('shop_product_variants.size_order')
+                ->pluck('size')
+        );
+
         $bodyClass = 'ecommerce-page shop-index-page';
 
-        return view('consumer.merchandise.index', compact('products', 'categories', 'featuredProducts', 'bodyClass'));
+        return view('consumer.merchandise.index', compact(
+            'products', 'categories', 'featuredProducts',
+            'availableColours', 'availableSizes', 'bodyClass'
+        ));
     }
 
     public function show(ShopProduct $product)
