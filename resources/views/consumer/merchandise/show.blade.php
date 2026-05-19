@@ -561,15 +561,24 @@
 </div>{{-- /container --}}
 
 {{-- ── MEMBERSHIP PROMO STRIP ── --}}
+@if($promoStrip['enabled'])
 <div class="pdp-member-strip">
     <div class="pdp-member-img"
-         style="background-image: url('{{ asset('images/membership-promo.webp') }}');background-color:#e5e5e5;">
+         style="background-color:#e5e5e5;{{ $promoStrip['image'] ? 'background-image:url(' . asset('storage/' . $promoStrip['image']) . ')' : '' }}">
     </div>
     <div class="pdp-member-text">
-        <p>it was popularised in the 1960s with the release of letraset sheets containing lorem ipsum passages, and more recently with desktop publishing software like aldus pagemaker including versions of lorem ipsum.</p>
-        <a href="{{ route('login') }}" class="pdp-member-login-btn">Login</a>
+        @if($promoStrip['heading'])
+            <h2>{{ $promoStrip['heading'] }}</h2>
+        @endif
+        @if($promoStrip['body'])
+            <p>{{ $promoStrip['body'] }}</p>
+        @endif
+        @if($promoStrip['button_text'])
+            <a href="{{ $promoStrip['button_url'] ?: '/login' }}" class="pdp-member-login-btn">{{ $promoStrip['button_text'] }}</a>
+        @endif
     </div>
 </div>
+@endif
 
 {{-- ── PRODUCTS YOU MIGHT LIKE ── --}}
 @if($related->isNotEmpty())

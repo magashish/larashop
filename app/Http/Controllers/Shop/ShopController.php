@@ -135,8 +135,17 @@ class ShopController extends Controller
             ShopSetting::get('shipping_returns', '')
         );
 
+        $promoStrip = Cache::remember('shop_setting_promo_strip', 600, fn() => [
+            'enabled'     => ShopSetting::get('promo_strip_enabled', '1') === '1',
+            'heading'     => ShopSetting::get('promo_strip_heading', 'Members get more'),
+            'body'        => ShopSetting::get('promo_strip_body', ''),
+            'button_text' => ShopSetting::get('promo_strip_button_text', 'Login'),
+            'button_url'  => ShopSetting::get('promo_strip_button_url', '/login'),
+            'image'       => ShopSetting::get('promo_strip_image', ''),
+        ]);
+
         $bodyClass = 'ecommerce-page product-page';
 
-        return view('consumer.merchandise.show', compact('product', 'related', 'shippingReturns', 'bodyClass'));
+        return view('consumer.merchandise.show', compact('product', 'related', 'shippingReturns', 'promoStrip', 'bodyClass'));
     }
 }
