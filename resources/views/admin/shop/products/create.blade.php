@@ -49,6 +49,11 @@
                             <label class="form-label fw-semibold">Full Description</label>
                             <textarea name="description" class="form-control" rows="6">{{ old('description') }}</textarea>
                         </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Care Instructions</label>
+                            <textarea name="care_instructions" class="form-control" rows="4" placeholder="e.g. Machine wash cold. Do not bleach. Tumble dry low.">{{ old('care_instructions') }}</textarea>
+                            <small class="text-muted">Shown in the Care Instructions accordion on the product page. Leave blank to hide the section.</small>
+                        </div>
                     </div>
 
                     <h6 class="text-muted mb-3 mt-4 border-bottom pb-2">Pricing</h6>

@@ -505,6 +505,7 @@ use App\Http\Controllers\Admin\Shop\ShippingController as AdminShippingControlle
 use App\Http\Controllers\Admin\Shop\TaxController as AdminTaxController;
 use App\Http\Controllers\Admin\Shop\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\Shop\ShopCategoryController as AdminShopCategoryController;
+use App\Http\Controllers\Admin\Shop\ShopSettingController as AdminShopSettingController;
 
 // ── Frontend: Account / Orders (auth required) ────────────────────────────
 Route::prefix('account')->name('shop.account.')->middleware('auth:web')->group(function () {
@@ -581,6 +582,10 @@ Route::prefix('admin/shop')->name('admin.shop.')->middleware(['admin.firewall', 
     Route::put('/coupons/{coupon}',            [AdminCouponController::class, 'update'])->name('coupons.update');
     Route::delete('/coupons/{coupon}',         [AdminCouponController::class, 'destroy'])->name('coupons.destroy');
     Route::get('/coupons/generate-code',       [AdminCouponController::class, 'generate'])->name('coupons.generate');
+
+    // Settings
+    Route::get('/settings',  [AdminShopSettingController::class, 'edit'])->name('settings.edit');
+    Route::put('/settings',  [AdminShopSettingController::class, 'update'])->name('settings.update');
 
     // Shop Categories
     Route::get('/categories',                  [AdminShopCategoryController::class, 'index'])->name('categories.index');

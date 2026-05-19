@@ -73,6 +73,7 @@ class ProductController extends Controller
         $validated['is_active']        = $request->boolean('is_active', true);
         $validated['is_featured']      = $request->boolean('is_featured');
         $validated['gender']           = $request->input('gender') ?: null;
+        $validated['meta']             = array_filter(['care_instructions' => $request->input('care_instructions') ?: null]);
 
         if ($request->hasFile('featured_image')) {
             $validated['featured_image'] = $this->storeAsWebp($request->file('featured_image'), 'shop/products');
@@ -123,13 +124,22 @@ class ProductController extends Controller
         $validated['is_featured']      = $request->boolean('is_featured');
         $validated['gender']           = $request->input('gender') ?: null;
 
+        // Merge care_instructions into existing meta so other meta keys are preserved
+        $existingMeta = $product->meta ?? [];
+        $careInstructions = $request->input('care_instructions') ?: null;
+        if ($careInstructions) {
+            $existingMeta['care_instructions'] = $careInstructions;
+        } else {
+            unset($existingMeta['care_instructions']);
+        }
+        $validated['meta'] = $existingMeta ?: null;
+
         if ($request->hasFile('featured_image')) {
             if ($product->featured_image) {
                 Storage::disk('public')->delete($product->featured_image);
             }
             $validated['featured_image'] = $this->storeAsWebp($request->file('featured_image'), 'shop/products');
         } else {
-            // Don't overwrite the existing image with null
             unset($validated['featured_image']);
         }
 

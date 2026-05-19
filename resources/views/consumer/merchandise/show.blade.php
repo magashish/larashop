@@ -519,6 +519,7 @@
                 </div>
                 @endif
 
+                @if($shippingReturns)
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseShipping">
@@ -527,13 +528,14 @@
                     </h2>
                     <div id="collapseShipping" class="accordion-collapse collapse" data-bs-parent="#pdpAccordion">
                         <div class="accordion-body">
-                            <p>Orders are dispatched within 1–3 business days. Standard delivery 3–7 business days.</p>
-                            <p>Free shipping on orders over $100.</p>
-                            <p class="mb-0">Returns accepted within 30 days of purchase. Items must be unworn and in original packaging.</p>
+                            {!! nl2br(e($shippingReturns)) !!}
                         </div>
                     </div>
                 </div>
+                @endif
 
+                @php $careInstructions = ($product->meta ?? [])['care_instructions'] ?? null; @endphp
+                @if($careInstructions)
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCare">
@@ -542,20 +544,11 @@
                     </h2>
                     <div id="collapseCare" class="accordion-collapse collapse" data-bs-parent="#pdpAccordion">
                         <div class="accordion-body">
-                            @php $meta = $product->meta ?? []; @endphp
-                            @if(!empty($meta['care_notes']))
-                                <p>{{ $meta['care_notes'] }}</p>
-                            @endif
-                            @if($product->weight)
-                                <p><strong>Weight:</strong> {{ $product->weight }} kg</p>
-                            @endif
-                            @if(!empty($meta['fabric']))
-                                <p><strong>Fabric:</strong> {{ $meta['fabric'] }}</p>
-                            @endif
-                            <p class="mb-0">Machine wash cold. Do not bleach. Tumble dry low. Cool iron. Do not dry clean.</p>
+                            {!! nl2br(e($careInstructions)) !!}
                         </div>
                     </div>
                 </div>
+                @endif
 
             </div>
             {{-- /accordion --}}

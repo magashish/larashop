@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ShopProduct;
 use App\Models\ShopCategory;
 use App\Models\ShopProductVariant;
+use App\Models\ShopSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -122,8 +123,12 @@ class ShopController extends Controller
             ->where('shop_category_id', $product->shop_category_id)
             ->take(4)->get();
 
+        $shippingReturns = Cache::remember('shop_setting_shipping_returns', 600, fn() =>
+            ShopSetting::get('shipping_returns', '')
+        );
+
         $bodyClass = 'ecommerce-page product-page';
 
-        return view('consumer.merchandise.show', compact('product', 'related', 'bodyClass'));
+        return view('consumer.merchandise.show', compact('product', 'related', 'shippingReturns', 'bodyClass'));
     }
 }
