@@ -19,10 +19,14 @@ class ShopSettingController extends Controller
     {
         $request->validate([
             'shipping_returns' => 'nullable|string|max:5000',
+            'coming_soon'      => 'boolean',
         ]);
 
         ShopSetting::set('shipping_returns', $request->input('shipping_returns'));
+        ShopSetting::set('coming_soon', $request->boolean('coming_soon') ? '1' : '0');
+
         Cache::forget('shop_setting_shipping_returns');
+        Cache::forget('shop_setting_coming_soon');
 
         return redirect()->route('admin.shop.settings.edit')
             ->with('success', 'Shop settings saved.');

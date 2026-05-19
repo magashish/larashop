@@ -17,6 +17,18 @@
         @csrf @method('PUT')
 
         <div class="card shadow mb-4">
+            <div class="card-header fw-semibold"><i class="bi bi-shop"></i> Shop Visibility</div>
+            <div class="card-body">
+                <div class="form-check form-switch mb-1">
+                    <input class="form-check-input" type="checkbox" name="coming_soon" value="1" id="coming_soon"
+                           @checked(old('coming_soon', $settings['coming_soon'] ?? '0') === '1')>
+                    <label class="form-check-label fw-semibold" for="coming_soon">Enable Coming Soon mode</label>
+                </div>
+                <small class="text-muted">When enabled, the shop listing page shows a "Coming Soon" message instead of products. The admin and individual product pages are unaffected.</small>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
             <div class="card-header fw-semibold"><i class="bi bi-truck"></i> Shipping &amp; Returns</div>
             <div class="card-body">
                 <p class="text-muted small mb-3">This text appears in the <strong>Shipping &amp; Returns</strong> accordion on every product page.</p>

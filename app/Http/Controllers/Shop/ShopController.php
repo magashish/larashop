@@ -14,6 +14,14 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
+        $comingSoon = Cache::remember('shop_setting_coming_soon', 600, fn() =>
+            ShopSetting::get('coming_soon', '0')
+        );
+
+        if ($comingSoon === '1') {
+            return view('consumer.merchandise.coming-soon', ['bodyClass' => 'ecommerce-page shop-coming-soon-page']);
+        }
+
         // Eager-load variants to prevent N+1 in isInStock() called from product cards
         $query = ShopProduct::with(['category', 'images', 'variants'])
             ->where('is_active', true);
