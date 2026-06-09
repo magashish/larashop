@@ -6,7 +6,9 @@
         </button>
     </div>
     <div class="card-body">
-        <p class="text-muted small mb-3">
+        {{-- Sentinels: tell the controller the panel was present on submit --}}
+        <input type="hidden" name="variants_managed" value="1">
+        <input type="hidden" name="color_management_active" value="1">
             Each row = one Colour + Size combination. Stock is tracked per variant.
             Leave price adjustment at 0 unless this variant costs more/less.
         </p>
@@ -60,6 +62,8 @@
                         </button>
                     </div>
                     <div class="card-body pb-2">
+                        {{-- Retained marker: removed from DOM when the user deletes this group --}}
+                        <input type="hidden" name="retained_color_groups[]" value="{{ $cg['name'] }}">
                         <input type="hidden"
                                name="color_image_groups[{{ $gi }}][color_name]"
                                value="{{ $cg['name'] }}">

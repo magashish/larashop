@@ -147,6 +147,7 @@ class ProductController extends Controller
 
         $this->saveGalleryImages($request, $product);
         $this->saveVariants($request, $product);
+        $this->deleteRemovedColorGroups($request, $product);
         $this->saveColorImages($request, $product);
 
         return redirect()->route('admin.shop.products.edit', $product)
@@ -225,7 +226,10 @@ class ProductController extends Controller
 
     private function saveVariants(Request $request, ShopProduct $product): void
     {
-        if (!$request->has('variants')) {
+        // Only process when the variants panel was actually present on the form.
+        // Using a sentinel avoids the bug where removing ALL rows causes
+        // $request->has('variants') to be false and nothing gets deleted.
+        if (!$request->has('variants_managed')) {
             return;
         }
 
@@ -267,6 +271,28 @@ class ProductController extends Controller
                 ShopProductVariant::create($attrs);
             }
         }
+    }
+
+    private function deleteRemovedColorGroups(Request $request, ShopProduct $product): void
+    {
+        if (!$request->has('color_management_active')) {
+            return;
+        }
+
+        $retained = $request->input('retained_color_groups', []);
+
+        // Find colour image records that belong to groups no longer on the form
+        $toDelete = $product->colorImages()
+            ->when(!empty($retained), fn($q) => $q->whereNotIn('color_name', $retained))
+            ->get();
+
+        foreach ($toDelete as $img) {
+            Storage::disk('public')->delete($img->image_path);
+        }
+
+        $product->colorImages()
+            ->when(!empty($retained), fn($q) => $q->whereNotIn('color_name', $retained))
+            ->delete();
     }
 
     private function saveColorImages(Request $request, ShopProduct $product): void
