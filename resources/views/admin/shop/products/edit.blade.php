@@ -92,7 +92,10 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Stock Quantity</label>
-                            <input type="number" name="stock_quantity" class="form-control" value="{{ old('stock_quantity', $product->stock_quantity) }}" min="0">
+                            <input type="number" name="stock_quantity" id="mainStockQty" class="form-control" value="{{ old('stock_quantity', $product->stock_quantity) }}" min="0">
+                            <small id="mainStockNote" class="text-muted d-none">
+                                <i class="bi bi-info-circle"></i> Auto-calculated from variant stocks below.
+                            </small>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Weight (kg)</label>

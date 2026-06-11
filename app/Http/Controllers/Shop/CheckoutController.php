@@ -253,6 +253,10 @@ class CheckoutController extends Controller
                 // Decrement stock from the variant if one exists, otherwise from the product
                 if ($item->variant) {
                     $item->variant->decrement('stock_quantity', $item->quantity);
+                    // Keep product total in sync with the sum of all variant stocks
+                    $item->product->update([
+                        'stock_quantity' => $item->product->variants()->sum('stock_quantity'),
+                    ]);
                 } elseif ($item->product->track_stock) {
                     $item->product->decrement('stock_quantity', $item->quantity);
                 }

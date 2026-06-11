@@ -242,10 +242,17 @@ function checkSkuDuplicates() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Live check as user types in any SKU field
+    // Run on page load so existing variants set the read-only state immediately
+    syncMainStock();
+
     document.addEventListener('input', function (e) {
+        // Live SKU duplicate check
         if (e.target.matches('#variantRows input[name$="[sku]"]')) {
             checkSkuDuplicates();
+        }
+        // Live stock sum
+        if (e.target.matches('#variantRows input[name$="[stock_quantity]"]')) {
+            syncMainStock();
         }
     });
 
@@ -264,6 +271,29 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+// ── Main stock auto-sum ───────────────────────────────────────────────────
+function syncMainStock() {
+    const stockInputs = document.querySelectorAll('#variantRows input[name$="[stock_quantity]"]');
+    const mainStock   = document.getElementById('mainStockQty');
+    const note        = document.getElementById('mainStockNote');
+    if (!mainStock) return;
+
+    if (stockInputs.length > 0) {
+        let total = 0;
+        stockInputs.forEach(inp => { total += parseInt(inp.value || 0); });
+        mainStock.value    = total;
+        mainStock.readOnly = true;
+        mainStock.style.background = '#f8f9fa';
+        mainStock.title    = 'Auto-calculated as the sum of all variant stock quantities';
+        if (note) note.classList.remove('d-none');
+    } else {
+        mainStock.readOnly = false;
+        mainStock.style.background = '';
+        mainStock.title    = '';
+        if (note) note.classList.add('d-none');
+    }
+}
 
 // ── Datalist helpers ─────────────────────────────────────────────────────
 function syncColourDatalist() {
@@ -304,10 +334,12 @@ function addVariantRow() {
         <td><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVariantRow(this)">×</button></td>
     </tr>`;
     document.getElementById('variantRows').insertAdjacentHTML('beforeend', row);
+    syncMainStock();
 }
 
 function removeVariantRow(btn) {
     btn.closest('tr').remove();
+    syncMainStock();
 }
 
 function addColorImageGroup() {
@@ -367,6 +399,7 @@ function confirmBulkAdd() {
         document.getElementById('variantRows').insertAdjacentHTML('beforeend', row);
     });
 
+    syncMainStock();
     bootstrap.Modal.getInstance(document.getElementById('bulkSizeModal')).hide();
 }
 </script>

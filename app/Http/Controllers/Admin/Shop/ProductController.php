@@ -84,6 +84,7 @@ class ProductController extends Controller
         $this->saveGalleryImages($request, $product);
         $this->saveVariants($request, $product);
         $this->saveColorImages($request, $product);
+        $this->syncProductStock($product);
 
         return redirect()->route('admin.shop.products.index')
             ->with('success', 'Product created successfully.');
@@ -149,6 +150,7 @@ class ProductController extends Controller
         $this->saveVariants($request, $product);
         $this->deleteRemovedColorGroups($request, $product);
         $this->saveColorImages($request, $product);
+        $this->syncProductStock($product);
 
         return redirect()->route('admin.shop.products.edit', $product)
             ->with('success', 'Product updated successfully.');
@@ -287,6 +289,13 @@ class ProductController extends Controller
             } else {
                 ShopProductVariant::create($attrs);
             }
+        }
+    }
+
+    private function syncProductStock(ShopProduct $product): void
+    {
+        if ($product->variants()->exists()) {
+            $product->update(['stock_quantity' => $product->variants()->sum('stock_quantity')]);
         }
     }
 
