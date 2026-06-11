@@ -7,7 +7,6 @@ use App\Models\ShopProduct;
 use App\Models\ShopCategory;
 use App\Models\ShopProductImage;
 use App\Models\ShopProductVariant;
-use App\Models\ShopProductColorImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -83,7 +82,6 @@ class ProductController extends Controller
 
         $this->saveGalleryImages($request, $product);
         $this->saveVariants($request, $product);
-        $this->saveColorImages($request, $product);
         $this->syncProductStock($product);
 
         return redirect()->route('admin.shop.products.index')
@@ -148,8 +146,6 @@ class ProductController extends Controller
 
         $this->saveGalleryImages($request, $product);
         $this->saveVariants($request, $product);
-        $this->deleteRemovedColorGroups($request, $product);
-        $this->saveColorImages($request, $product);
         $this->syncProductStock($product);
 
         return redirect()->route('admin.shop.products.edit', $product)
@@ -299,52 +295,4 @@ class ProductController extends Controller
         }
     }
 
-    private function deleteRemovedColorGroups(Request $request, ShopProduct $product): void
-    {
-        if (!$request->has('color_management_active')) {
-            return;
-        }
-
-        $retained = $request->input('retained_color_groups', []);
-
-        // Find colour image records that belong to groups no longer on the form
-        $toDelete = $product->colorImages()
-            ->when(!empty($retained), fn($q) => $q->whereNotIn('color_name', $retained))
-            ->get();
-
-        foreach ($toDelete as $img) {
-            Storage::disk('public')->delete($img->image_path);
-        }
-
-        $product->colorImages()
-            ->when(!empty($retained), fn($q) => $q->whereNotIn('color_name', $retained))
-            ->delete();
-    }
-
-    private function saveColorImages(Request $request, ShopProduct $product): void
-    {
-        if (!$request->has('color_image_groups') || !$request->hasFile('color_image_groups')) {
-            return;
-        }
-
-        foreach ($request->file('color_image_groups') as $index => $group) {
-            if (empty($group['images'])) {
-                continue;
-            }
-            $colorName = $request->input("color_image_groups.{$index}.color_name", '');
-            if (!$colorName) {
-                continue;
-            }
-            $existingCount = $product->colorImages()->where('color_name', $colorName)->count();
-            foreach ($group['images'] as $i => $image) {
-                $path = $this->storeAsWebp($image, 'shop/products/colors');
-                ShopProductColorImage::create([
-                    'shop_product_id' => $product->id,
-                    'color_name'      => $colorName,
-                    'image_path'      => $path,
-                    'sort_order'      => $existingCount + $i,
-                ]);
-            }
-        }
-    }
 }

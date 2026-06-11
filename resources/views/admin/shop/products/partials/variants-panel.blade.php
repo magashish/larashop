@@ -6,109 +6,25 @@
         </button>
     </div>
     <div class="card-body">
-        {{-- Sentinels: tell the controller the panel was present on submit --}}
+        {{-- Sentinel: tells the controller the panel was present on submit --}}
         <input type="hidden" name="variants_managed" value="1">
-        <input type="hidden" name="color_management_active" value="1">
+        <p class="text-muted small mb-3">
             Each row = one Colour + Size combination. Stock is tracked per variant.
             Leave price adjustment at 0 unless this variant costs more/less.
         </p>
 
-        {{-- Colour Images --}}
         @php
-            // Merge: one group per unique variant colour (with or without uploaded images)
-            $existingColorImages = isset($product)
-                ? $product->colorImages->groupBy('color_name')
-                : collect();
             $variantColors = isset($product)
                 ? $product->variants->pluck('color_name')->unique()->filter()->values()
                 : collect();
-            $allColorGroups = collect();
-            foreach ($variantColors as $cn) {
-                $allColorGroups->push(['name' => $cn, 'images' => $existingColorImages->get($cn, collect())]);
-            }
-            // Include any orphaned colour-image groups not tied to a variant colour
-            foreach ($existingColorImages as $cn => $imgs) {
-                if (!$variantColors->contains($cn)) {
-                    $allColorGroups->push(['name' => $cn, 'images' => $imgs]);
-                }
-            }
         @endphp
 
         {{-- Datalist kept in sync by JS --}}
         <datalist id="colourNameList">
-            @foreach($allColorGroups as $cg)
-            <option value="{{ $cg['name'] }}">
+            @foreach($variantColors as $cn)
+            <option value="{{ $cn }}">
             @endforeach
         </datalist>
-
-        <div class="mb-4">
-            <h6 class="fw-semibold mb-2"><i class="bi bi-images"></i> Colour-Specific Image Galleries</h6>
-            <p class="text-muted small mb-2">
-                Upload images per colour — the gallery on the product page swaps automatically when a customer selects that colour.
-            </p>
-
-            <div id="colorImagesContainer">
-                @forelse($allColorGroups as $gi => $cg)
-                <div class="color-image-group card mb-3">
-                    <div class="card-header py-2 d-flex align-items-center justify-content-between">
-                        <span class="fw-semibold" style="font-size:13px">
-                            <i class="bi bi-palette2 me-1"></i>
-                            {{ $cg['name'] }}
-                        </span>
-                        <button type="button" class="btn btn-outline-danger btn-sm py-0"
-                                onclick="this.closest('.color-image-group').remove()"
-                                title="Remove this colour group">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                    <div class="card-body pb-2">
-                        {{-- Retained marker: removed from DOM when the user deletes this group --}}
-                        <input type="hidden" name="retained_color_groups[]" value="{{ $cg['name'] }}">
-                        <input type="hidden"
-                               name="color_image_groups[{{ $gi }}][color_name]"
-                               value="{{ $cg['name'] }}">
-
-                        {{-- Existing images --}}
-                        @if($cg['images']->count())
-                        <div class="d-flex flex-wrap gap-2 mb-2">
-                            @foreach($cg['images'] as $img)
-                            <div class="position-relative">
-                                <img src="{{ asset('storage/' . $img->image_path) }}"
-                                     class="rounded" style="width:80px;height:80px;object-fit:cover;border:1px solid #dee2e6">
-                                <button type="button"
-                                        class="btn btn-danger btn-sm p-0 px-1 position-absolute top-0 end-0 m-0"
-                                        style="font-size:10px;line-height:1.4"
-                                        onclick="shopDeleteItem('{{ route('admin.shop.products.delete-color-image', $img) }}')">×</button>
-                            </div>
-                            @endforeach
-                        </div>
-                        @else
-                        <p class="text-muted small mb-2">No images uploaded yet.</p>
-                        @endif
-
-                        {{-- Upload more --}}
-                        <div>
-                            <label class="form-label small fw-semibold mb-1">
-                                {{ $cg['images']->count() ? 'Add more images' : 'Upload images' }}
-                            </label>
-                            <input type="file"
-                                   name="color_image_groups[{{ $gi }}][images][]"
-                                   class="form-control form-control-sm"
-                                   accept="image/*" multiple>
-                        </div>
-                    </div>
-                </div>
-                @empty
-                <p class="text-muted small" id="noColourGroupsMsg">
-                    Add variants below first — a gallery group will appear here for each colour.
-                </p>
-                @endforelse
-            </div>
-
-            <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="addColorImageGroup()">
-                <i class="bi bi-plus-circle"></i> Add Colour Image Group
-            </button>
-        </div>
 
         <hr>
 
@@ -215,7 +131,6 @@
 
 <script>
 let variantRowIndex = {{ isset($product) ? $product->variants->count() : 0 }};
-let colorImageGroupIndex = {{ $allColorGroups->count() }};
 
 // ── SKU duplicate validation ──────────────────────────────────────────────
 function checkSkuDuplicates() {
@@ -340,37 +255,6 @@ function addVariantRow() {
 function removeVariantRow(btn) {
     btn.closest('tr').remove();
     syncMainStock();
-}
-
-function addColorImageGroup() {
-    syncColourDatalist();
-    const noMsg = document.getElementById('noColourGroupsMsg');
-    if (noMsg) noMsg.remove();
-    const i = colorImageGroupIndex++;
-    const html = `<div class="color-image-group card mb-3">
-        <div class="card-header py-2 d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-2 flex-grow-1">
-                <i class="bi bi-palette2"></i>
-                <input type="text" name="color_image_groups[${i}][color_name]"
-                       list="colourNameList"
-                       class="form-control form-control-sm colour-group-name"
-                       style="max-width:200px" placeholder="Colour name (e.g. Black)">
-            </div>
-            <button type="button" class="btn btn-outline-danger btn-sm py-0"
-                    onclick="this.closest('.color-image-group').remove()" title="Remove">
-                <i class="bi bi-trash"></i>
-            </button>
-        </div>
-        <div class="card-body pb-2">
-            <p class="text-muted small mb-2">No images uploaded yet.</p>
-            <div>
-                <label class="form-label small fw-semibold mb-1">Upload images</label>
-                <input type="file" name="color_image_groups[${i}][images][]"
-                       class="form-control form-control-sm" accept="image/*" multiple>
-            </div>
-        </div>
-    </div>`;
-    document.getElementById('colorImagesContainer').insertAdjacentHTML('beforeend', html);
 }
 
 function bulkAddSizes() {
