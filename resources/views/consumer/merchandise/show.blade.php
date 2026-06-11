@@ -665,9 +665,10 @@ const pdpColorVariants = @json($colorVariants);
 const pdpColorImages   = @json($colorImages);
 const pdpDefaultImages = @json($defaultImages);
 const pdpVariantImages = @json($variantImages);
-const pdpBasePrice     = @json((float)$baseDisplayPrice);
-const pdpIsOnSale      = @json((bool)$product->is_on_sale);
-const pdpOrigPrice     = @json((float)$product->price);
+const pdpBasePrice        = @json((float)$baseDisplayPrice);
+const pdpIsOnSale         = @json((bool)$product->is_on_sale);
+const pdpOrigPrice        = @json((float)$product->price);
+const pdpAllowBackorders  = @json((bool)$product->allow_backorders);
 
 let pdpColour    = @json($firstColor);
 let pdpSize      = null;
@@ -760,13 +761,14 @@ function pdpRenderSizes(colour) {
     sorted.forEach(([size, data]) => {
         const btn = document.createElement('button');
         btn.type      = 'button';
-        btn.className = 'pdp-size-btn' + (data.stock === 0 ? ' oos' : '');
+        const isOos = data.stock === 0 && !pdpAllowBackorders;
+        btn.className = 'pdp-size-btn' + (isOos ? ' oos' : '');
         btn.textContent      = size;
         btn.dataset.size      = size;
         btn.dataset.variantId = data.id;
         btn.dataset.stock     = data.stock;
         btn.dataset.price     = data.price;
-        if (data.stock > 0) btn.onclick = () => pdpSelectSize(btn);
+        if (!isOos) btn.onclick = () => pdpSelectSize(btn);
         container.appendChild(btn);
     });
 }
@@ -793,6 +795,8 @@ function pdpSelectSize(btn) {
     if (notice) {
         if (stock > 0 && stock <= 5)
             notice.innerHTML = '<span style="color:#e67e22">Only ' + stock + ' left in this size</span>';
+        else if (stock === 0 && pdpAllowBackorders)
+            notice.innerHTML = '<span style="color:#2980b9">Available on backorder</span>';
         else if (stock === 0)
             notice.innerHTML = '<span style="color:#c0392b">Out of stock in this size</span>';
         else
@@ -800,7 +804,8 @@ function pdpSelectSize(btn) {
     }
 
     const addBtn = document.getElementById('pdpAddBtn');
-    if (addBtn) { addBtn.disabled = stock === 0; addBtn.textContent = stock === 0 ? 'OUT OF STOCK' : 'ADD TO CART'; }
+    const outOfStock = stock === 0 && !pdpAllowBackorders;
+    if (addBtn) { addBtn.disabled = outOfStock; addBtn.textContent = outOfStock ? 'OUT OF STOCK' : 'ADD TO CART'; }
 
     const stickyLbl = document.getElementById('pdpStickyLabel');
     if (stickyLbl) stickyLbl.textContent = (pdpColour || '') + ' / ' + pdpSize;

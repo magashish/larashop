@@ -70,7 +70,7 @@ class CartController extends Controller
             if (!$variant || !$variant->is_active) {
                 return back()->with('error', 'Selected variant is not available.');
             }
-            if ($variant->stock_quantity < $request->quantity) {
+            if ($variant->stock_quantity < $request->quantity && !$product->allow_backorders) {
                 return back()->with('error', 'Insufficient stock for the selected size.');
             }
             $unitPrice    = $variant->final_price;
