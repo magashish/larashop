@@ -112,6 +112,11 @@
 
         <hr>
 
+        {{-- SKU duplicate error banner --}}
+        <div id="skuDuplicateError" class="alert alert-danger py-2 d-none" style="font-size:13px">
+            <strong>Duplicate SKUs detected.</strong> Each variant must have a unique SKU, or leave the SKU field blank. Please fix the highlighted rows before saving.
+        </div>
+
         {{-- Variant rows table --}}
         <div class="table-responsive">
             <table class="table table-bordered align-middle" id="variantsTable">
@@ -121,7 +126,7 @@
                         <th style="width:90px">Hex</th>
                         <th style="width:100px">Size</th>
                         <th style="width:70px">Sort #</th>
-                        <th>SKU</th>
+                        <th>SKU <small class="text-muted fw-normal">(unique per row, or leave blank)</small></th>
                         <th style="width:90px">Stock</th>
                         <th style="width:100px">+/- Price</th>
                         <th style="width:60px">Active</th>
@@ -211,6 +216,54 @@
 <script>
 let variantRowIndex = {{ isset($product) ? $product->variants->count() : 0 }};
 let colorImageGroupIndex = {{ $allColorGroups->count() }};
+
+// ── SKU duplicate validation ──────────────────────────────────────────────
+function checkSkuDuplicates() {
+    const inputs = document.querySelectorAll('#variantRows input[name$="[sku]"]');
+    const seen   = {};
+    let hasDupes = false;
+
+    inputs.forEach(inp => { inp.classList.remove('is-invalid'); inp.removeAttribute('title'); });
+
+    inputs.forEach(inp => {
+        const val = inp.value.trim().toLowerCase();
+        if (!val) return;
+        if (seen[val]) {
+            inp.classList.add('is-invalid');
+            inp.title = 'Duplicate SKU — must be unique or left blank';
+            seen[val].classList.add('is-invalid');
+            seen[val].title = 'Duplicate SKU — must be unique or left blank';
+            hasDupes = true;
+        } else {
+            seen[val] = inp;
+        }
+    });
+    return hasDupes;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Live check as user types in any SKU field
+    document.addEventListener('input', function (e) {
+        if (e.target.matches('#variantRows input[name$="[sku]"]')) {
+            checkSkuDuplicates();
+        }
+    });
+
+    // Block form submission if duplicates remain
+    const form = document.getElementById('{{ $formId ?? "productForm" }}');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            if (checkSkuDuplicates()) {
+                e.preventDefault();
+                const errEl = document.getElementById('skuDuplicateError');
+                if (errEl) {
+                    errEl.classList.remove('d-none');
+                    errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+    }
+});
 
 // ── Datalist helpers ─────────────────────────────────────────────────────
 function syncColourDatalist() {

@@ -239,6 +239,23 @@ class ProductController extends Controller
         // Delete variants that were removed in the UI
         $product->variants()->whereNotIn('id', $submittedIds)->delete();
 
+        // Safety net: null out duplicate SKUs so the unique DB constraint never fires.
+        // The client-side validator should catch this first, but this prevents a crash
+        // if the same SKU is entered in multiple rows.
+        $seenSkus = [];
+        $submitted = $submitted->map(function ($data) use (&$seenSkus) {
+            $sku = trim($data['sku'] ?? '');
+            if ($sku !== '') {
+                $key = strtolower($sku);
+                if (in_array($key, $seenSkus)) {
+                    $data['sku'] = ''; // null out the duplicate
+                } else {
+                    $seenSkus[] = $key;
+                }
+            }
+            return $data;
+        });
+
         foreach ($submitted as $index => $data) {
             $attrs = [
                 'shop_product_id'  => $product->id,
