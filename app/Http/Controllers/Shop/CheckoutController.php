@@ -23,7 +23,7 @@ class CheckoutController extends Controller
     private function getCartItems()
     {
         return ShopCartItem::where('session_id', session()->getId())
-            ->with('product')->get();
+            ->with('product', 'variant')->get();
     }
 
     public function index()
@@ -250,8 +250,10 @@ class CheckoutController extends Controller
                     'meta'            => $meta ?: null,
                 ]);
 
-                // Decrement stock
-                if ($item->product->track_stock) {
+                // Decrement stock from the variant if one exists, otherwise from the product
+                if ($item->variant) {
+                    $item->variant->decrement('stock_quantity', $item->quantity);
+                } elseif ($item->product->track_stock) {
                     $item->product->decrement('stock_quantity', $item->quantity);
                 }
             }
